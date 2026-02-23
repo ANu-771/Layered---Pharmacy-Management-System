@@ -8,6 +8,7 @@ module lk.ijse.pharmacy {
     requires java.desktop;
     requires net.sf.jasperreports.core;
     requires java.mail;
+    requires lk.ijse.pharmacy;
 
 
     opens lk.ijse.pharmacy to javafx.fxml;

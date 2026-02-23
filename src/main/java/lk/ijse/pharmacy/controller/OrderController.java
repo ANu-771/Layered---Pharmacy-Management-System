@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
@@ -111,6 +112,9 @@ public class OrderController {
     private ObservableList<CartTM> cartList = FXCollections.observableArrayList();
     private double netTotal = 0;
 
+    CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+
+
     @FXML
     public void initialize() {
         setCellValueFactory();
@@ -146,7 +150,7 @@ public class OrderController {
 
     private void loadCustomerIds() {
         try {
-            List<CustomerDTO> allCustomers = customerModel.getAll();
+            List<CustomerDTO> allCustomers = customerDAO.getAll();
             ObservableList<String> ids = FXCollections.observableArrayList();
             for (CustomerDTO c : allCustomers) {
                 ids.add(String.valueOf(c.getCustomerId()));
@@ -180,7 +184,7 @@ public class OrderController {
         }
 
         try {
-            CustomerDTO customer = customerModel.search(Integer.parseInt(id));
+            CustomerDTO customer = customerDAO.search(Integer.parseInt(id));
             if (customer != null) {
                 lblCustomerName.setText(customer.getName());
             }

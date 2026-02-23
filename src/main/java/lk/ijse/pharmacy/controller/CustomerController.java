@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.model.CustomerModel;
@@ -51,6 +52,8 @@ public class CustomerController {
     CustomerModel customerModel = new CustomerModel();
     ObservableList<CustomerDTO> customerList = FXCollections.observableArrayList();
 
+    CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+
     @FXML
     private void initialize() {
 
@@ -86,7 +89,7 @@ public class CustomerController {
 
             CustomerDTO customerDTO;
             try {
-                customerDTO = customerModel.search(Integer.parseInt(id));
+                customerDTO = customerDAO.search(Integer.parseInt(id));
                 if (customerDTO == null) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customer Not Found");
                     alert.showAndWait();
@@ -133,7 +136,7 @@ public class CustomerController {
         CustomerDTO customer = new CustomerDTO(id, name, contact, address);
 
         try {
-            boolean isSaved = customerModel.save(customer); //cAll the model
+            boolean isSaved = customerDAO.save(customer); //cAll the model
             if (isSaved) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Saved Successfully!").show();
                 loadAllCustomers();
@@ -191,7 +194,7 @@ public class CustomerController {
         if (!confirmed) return; // Stop if Cancel is clicked
 
         try {
-            boolean isDeleted = customerModel.delete(Integer.parseInt(id)); //
+            boolean isDeleted = customerDAO.delete(Integer.parseInt(id)); //
             if (isDeleted) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
                 loadAllCustomers();
@@ -264,7 +267,7 @@ public class CustomerController {
         CustomerDTO customer = new CustomerDTO(Integer.parseInt(idText), name, contact, address);
 
         try {
-            boolean isUpdated = customerModel.update(customer);
+            boolean isUpdated = customerDAO.update(customer);
             if (isUpdated) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Updated Successfully!").show();
                 loadAllCustomers();
@@ -281,7 +284,7 @@ public class CustomerController {
     private void loadAllCustomers() {
         try {
             customerList.clear();
-            customerList.setAll(customerModel.getAll());
+            customerList.setAll(customerDAO.getAll());
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }
