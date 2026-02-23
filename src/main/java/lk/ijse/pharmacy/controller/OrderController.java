@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
+import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
@@ -113,7 +114,7 @@ public class OrderController {
     private double netTotal = 0;
 
     CustomerDAOImpl customerDAO = new CustomerDAOImpl();
-
+    MedicineDAOImpl medicineDAO = new MedicineDAOImpl();
 
     @FXML
     public void initialize() {
@@ -163,7 +164,7 @@ public class OrderController {
 
     private void loadMedicineIds() {
         try {
-            List<MedicineDTO> allMedicines = medicineModel.getAll();
+            List<MedicineDTO> allMedicines = medicineDAO.getAll();
             ObservableList<String> ids = FXCollections.observableArrayList();
             for (MedicineDTO m : allMedicines) {
                 ids.add(String.valueOf(m.getMedicineId()));
@@ -511,7 +512,7 @@ public class OrderController {
 
     private void loadMedicineNames() {
         try {
-            List<MedicineDTO> allMedicines = medicineModel.getAll();
+            List<MedicineDTO> allMedicines = medicineDAO.getAll();
             allMedicineNames.clear();
             for (MedicineDTO m : allMedicines) {
                 allMedicineNames.add(m.getMedName());

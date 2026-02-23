@@ -9,24 +9,24 @@ import java.util.List;
 
 public class MedicineModel {
 
-    public List<MedicineDTO> getAll() throws SQLException, ClassNotFoundException {
-        List<MedicineDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM medicine";
-        Connection connection = DBConnection.getInstance().getConnection();
-        ResultSet resultSet = connection.createStatement().executeQuery(sql);
-
-        while (resultSet.next()) {
-            list.add(new MedicineDTO(
-                    resultSet.getInt("medicine_id"), // Use getInt
-                    resultSet.getString("med_name"),
-                    resultSet.getString("brand"),
-                    resultSet.getInt("qty_in_stock"),
-                    resultSet.getDouble("unit_price"),
-                    resultSet.getDate("exp_date")
-            ));
-        }
-        return list;
-    }
+//    public List<MedicineDTO> getAll() throws SQLException, ClassNotFoundException {
+//        List<MedicineDTO> list = new ArrayList<>();
+//        String sql = "SELECT * FROM medicine";
+//        Connection connection = DBConnection.getInstance().getConnection();
+//        ResultSet resultSet = connection.createStatement().executeQuery(sql);
+//
+//        while (resultSet.next()) {
+//            list.add(new MedicineDTO(
+//                    resultSet.getInt("medicine_id"), // Use getInt
+//                    resultSet.getString("med_name"),
+//                    resultSet.getString("brand"),
+//                    resultSet.getInt("qty_in_stock"),
+//                    resultSet.getDouble("unit_price"),
+//                    resultSet.getDate("exp_date")
+//            ));
+//        }
+//        return list;
+//    }
 
     public boolean save(MedicineDTO medicine) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO medicine (med_name, brand, unit_price, exp_date, qty_in_stock) VALUES (?, ?, ?, ?, ?)";

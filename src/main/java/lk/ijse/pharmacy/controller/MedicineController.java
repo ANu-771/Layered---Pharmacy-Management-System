@@ -9,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
 import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.model.MedicineModel;
 
@@ -63,6 +64,9 @@ public class MedicineController {
     private MedicineModel medicineModel = new MedicineModel();
     private ObservableList<MedicineDTO> medicineList = FXCollections.observableArrayList();
     private List<String> allMedicineNames = new ArrayList<>();
+
+
+    MedicineDAOImpl medicineDAO = new MedicineDAOImpl();
 
 
     @FXML
@@ -330,7 +334,7 @@ public class MedicineController {
     private void loadAllMedicines() {
         try {
             medicineList.clear();
-            medicineList.addAll(medicineModel.getAll());
+            medicineList.addAll(medicineDAO.getAll());
 
             loadMedicineNames();
 
@@ -356,7 +360,7 @@ public class MedicineController {
 
     private void loadMedicineNames() {
         try {
-            List<MedicineDTO> allMedicines = medicineModel.getAll();
+            List<MedicineDTO> allMedicines = medicineDAO.getAll();
             allMedicineNames.clear();
             for (MedicineDTO m : allMedicines) {
                 allMedicineNames.add(m.getMedName());

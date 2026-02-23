@@ -46,6 +46,7 @@ public class DashboardController {
 
     private DashboardModel dashboardModel = new DashboardModel();
 
+
     @FXML
     public void initialize() {
         loadDashboardCounts();

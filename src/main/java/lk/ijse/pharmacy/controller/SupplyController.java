@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.geometry.Side;
+import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
 import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.dto.SupplierDTO;
 import lk.ijse.pharmacy.dto.tm.SupplyRecordTM;
@@ -59,6 +60,9 @@ public class SupplyController {
 
     private List<SupplierDTO> allSuppliers;
     private List<MedicineDTO> allMedicines;
+
+    MedicineDAOImpl  medicineDAO = new MedicineDAOImpl();
+
 
     public void initialize() {
         dpSupplyDate.setValue(LocalDate.now());
@@ -145,7 +149,7 @@ public class SupplyController {
     private void loadAllData() {
         try {
             allSuppliers = supplierModel.getAll();
-            allMedicines = medicineModel.getAll();
+            allMedicines = medicineDAO.getAll();
 
             // Load Supplier ID
             ObservableList<String> supIds = FXCollections.observableArrayList();
