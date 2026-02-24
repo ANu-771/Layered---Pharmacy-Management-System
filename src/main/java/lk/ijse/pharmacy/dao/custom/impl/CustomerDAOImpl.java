@@ -14,6 +14,8 @@ public class CustomerDAOImpl {
 
     // SAVE
     public boolean save(CustomerDTO customer) throws SQLException, ClassNotFoundException {
+
+
         Connection conn = DBConnection.getInstance().getConnection();
 
         String sql = "INSERT INTO customer (name, contact, address) VALUES (?,?,?)";

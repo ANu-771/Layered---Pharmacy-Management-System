@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
+import lk.ijse.pharmacy.dao.custom.impl.OrderDAOImpl;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
@@ -115,6 +116,9 @@ public class OrderController {
 
     CustomerDAOImpl customerDAO = new CustomerDAOImpl();
     MedicineDAOImpl medicineDAO = new MedicineDAOImpl();
+    OrderDAOImpl orderDAO = new OrderDAOImpl();
+
+
 
     @FXML
     public void initialize() {
@@ -143,7 +147,7 @@ public class OrderController {
     private void loadNextOrderId() {
 
         try {
-            txtOrderId.setText(orderModel.getNextOrderId());
+            txtOrderId.setText(orderDAO.getNextOrderId());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -203,7 +207,7 @@ public class OrderController {
         }
 
         try {
-            MedicineDTO medicine = medicineModel.search(Integer.parseInt(id));
+            MedicineDTO medicine = medicineDAO.search(Integer.parseInt(id));
             if (medicine != null) {
                 selectedMedicine = medicine;
 
@@ -444,7 +448,7 @@ public class OrderController {
         String name = txtDescription.getText().trim();
 
         try {
-            MedicineDTO medicine = medicineModel.searchByName(name);
+            MedicineDTO medicine = medicineDAO.searchByName(name);
 
             if (medicine != null) {
                 selectedMedicine = medicine;

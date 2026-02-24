@@ -22,6 +22,12 @@ public class PaymentDTO {
         this.paymentMethod = paymentMethod;
     }
 
+    public PaymentDTO(int i, double cashAmount, String paymentMethod) {
+        this.paymentId = i;
+        this.paymentMethod = paymentMethod;
+        this.amount = cashAmount;
+    }
+
     // Getters and Setters
     public int getPaymentId() {
         return paymentId;

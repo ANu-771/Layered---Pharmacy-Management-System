@@ -116,7 +116,7 @@ public class MedicineController {
         MedicineDTO medicine = new MedicineDTO(name, brand, qty, price, expDate);
 
         try {
-            if (medicineModel.save(medicine)) {
+            if (medicineDAO.save(medicine)) {
                 new Alert(Alert.AlertType.INFORMATION, "Medicine Saved Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -200,7 +200,7 @@ public class MedicineController {
         MedicineDTO medicine = new MedicineDTO(id, name, brand, qty, price, expDate);
 
         try {
-            if (medicineModel.update(medicine)) {
+            if (medicineDAO.update(medicine)) {
                 new Alert(Alert.AlertType.INFORMATION, "Updated Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -243,7 +243,7 @@ public class MedicineController {
         if (!confirmed) return;
 
         try {
-            if (medicineModel.delete(Integer.parseInt(idText))) { //
+            if (medicineDAO.delete(Integer.parseInt(idText))) { //
                 new Alert(Alert.AlertType.INFORMATION, "Deleted Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -264,13 +264,13 @@ public class MedicineController {
             try {
                 if (!idText.isEmpty()) {
                     if (idText.matches("^\\d+$")) {
-                        medicineDTO = medicineModel.search(Integer.parseInt(idText));
+                        medicineDTO = medicineDAO.search(Integer.parseInt(idText));
                     } else {
                         new Alert(Alert.AlertType.WARNING, "Invalid ID format!").show();
                         return;
                     }
                 } else if (!nameText.isEmpty()) {
-                    medicineDTO = medicineModel.searchByName(nameText);
+                    medicineDTO = medicineDAO.searchByName(nameText);
                 } else {
                     new Alert(Alert.AlertType.WARNING, "Please enter an ID or Name to search!").show();
                     return;
@@ -398,7 +398,7 @@ public class MedicineController {
                     suggestionsMenu.hide();
 
                     try {
-                        MedicineDTO medicine = medicineModel.searchByName(match);
+                        MedicineDTO medicine = medicineDAO.searchByName(match);
                         if (medicine != null) {
                             populateFields(medicine);
                         }
