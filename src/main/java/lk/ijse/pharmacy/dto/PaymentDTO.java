@@ -22,8 +22,8 @@ public class PaymentDTO {
         this.paymentMethod = paymentMethod;
     }
 
-    public PaymentDTO(int i, double cashAmount, String paymentMethod) {
-        this.paymentId = i;
+    public PaymentDTO(int orderId, double cashAmount, String paymentMethod) {
+        this.orderId = orderId;
         this.paymentMethod = paymentMethod;
         this.amount = cashAmount;
     }
