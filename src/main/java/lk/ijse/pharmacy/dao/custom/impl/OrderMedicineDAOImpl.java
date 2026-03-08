@@ -12,7 +12,6 @@ public class OrderMedicineDAOImpl {
 
 
         String sqlDetail = "INSERT INTO order_medicine (order_id, medicine_id, qty, unit_price, line_total) VALUES (?, ?, ?, ?, ?)";
-
         return CrudUtil.execute(sqlDetail,
                 orderMedicineDTO.getOrderId(),
                 orderMedicineDTO.getMedicineId(),

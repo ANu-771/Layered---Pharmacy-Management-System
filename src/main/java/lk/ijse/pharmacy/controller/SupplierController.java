@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import lk.ijse.pharmacy.dao.custom.impl.SupplierDAOImpl;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.dto.SupplierDTO;
@@ -52,6 +53,10 @@ public class SupplierController {
     SupplierModel supplierModel = new SupplierModel();
     ObservableList<SupplierDTO> supplierList = FXCollections.observableArrayList();
 
+
+
+    SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
+
     @FXML
     private void initialize() {
 
@@ -85,7 +90,7 @@ public class SupplierController {
 
             SupplierDTO supplierDTO;
             try {
-                supplierDTO = supplierModel.search(Integer.parseInt(id));
+                supplierDTO = supplierDAO.search(Integer.parseInt(id));
                 if (supplierDTO == null) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Supplier Not Found");
                     alert.showAndWait();
@@ -133,7 +138,7 @@ public class SupplierController {
         SupplierDTO supplier = new SupplierDTO(id, name, email, contact);
 
         try {
-            boolean isSaved = supplierModel.save(supplier);
+            boolean isSaved = supplierDAO.save(supplier);
             if (isSaved) {
                 new Alert(Alert.AlertType.INFORMATION, "Supplier Saved Successfully!").show();
                 loadAllSuppliers(); // Refresh Table
@@ -192,7 +197,7 @@ public class SupplierController {
         if (!confirmed) return;
 
         try {
-            boolean isDeleted = supplierModel.delete(Integer.parseInt(id));
+            boolean isDeleted = supplierDAO.delete(Integer.parseInt(id));
             if (isDeleted) {
                 new Alert(Alert.AlertType.INFORMATION, "Supplier Deleted Successfully!").show();
                 loadAllSuppliers();
@@ -265,7 +270,7 @@ public class SupplierController {
         SupplierDTO supplier = new SupplierDTO(Integer.parseInt(id), name, email, contact);
 
         try {
-            boolean isUpdated = supplierModel.update(supplier); //
+            boolean isUpdated = supplierDAO.update(supplier); //
             if (isUpdated) {
                 new Alert(Alert.AlertType.INFORMATION, "Supplier Updated Successfully!").show();
                 loadAllSuppliers();
@@ -281,7 +286,7 @@ public class SupplierController {
     private void loadAllSuppliers() {
         try {
             supplierList.clear();
-            supplierList.setAll(supplierModel.getAll());
+            supplierList.setAll(supplierDAO.getAll());
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }

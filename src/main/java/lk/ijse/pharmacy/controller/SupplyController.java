@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.geometry.Side;
 import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
+import lk.ijse.pharmacy.dao.custom.impl.SupplierDAOImpl;
 import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.dto.SupplierDTO;
 import lk.ijse.pharmacy.dto.tm.SupplyRecordTM;
@@ -62,6 +63,7 @@ public class SupplyController {
     private List<MedicineDTO> allMedicines;
 
     MedicineDAOImpl  medicineDAO = new MedicineDAOImpl();
+    SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
 
 
     public void initialize() {
@@ -148,7 +150,7 @@ public class SupplyController {
 
     private void loadAllData() {
         try {
-            allSuppliers = supplierModel.getAll();
+            allSuppliers = supplierDAO.getAll();
             allMedicines = medicineDAO.getAll();
 
             // Load Supplier ID

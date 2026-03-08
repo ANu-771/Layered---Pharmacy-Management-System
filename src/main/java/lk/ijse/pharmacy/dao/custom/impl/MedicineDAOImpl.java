@@ -17,7 +17,6 @@ public class MedicineDAOImpl {
         List<MedicineDTO> list = new ArrayList<>();
 
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM medicine");
-
         while (resultSet.next()) {
             list.add(new MedicineDTO(
                     resultSet.getInt("medicine_id"), // Use getInt
@@ -58,14 +57,12 @@ public class MedicineDAOImpl {
     }
 
     public boolean delete(int id) throws SQLException, ClassNotFoundException {
-
         return CrudUtil.execute("DELETE FROM medicine WHERE medicine_id=?", id);
     }
 
     public MedicineDTO search(int id) throws SQLException, ClassNotFoundException {
 
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM medicine WHERE medicine_id=?", id);
-
         if (resultSet.next()) {
             return new MedicineDTO(
                     resultSet.getInt("medicine_id"),
@@ -83,7 +80,6 @@ public class MedicineDAOImpl {
     public MedicineDTO searchByName(String name) throws SQLException, ClassNotFoundException {
 
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM medicine WHERE med_name = ?", name);
-
         if (resultSet.next()) {
             return new MedicineDTO(
                     resultSet.getInt("medicine_id"),
@@ -101,6 +97,5 @@ public class MedicineDAOImpl {
         String sql = "UPDATE medicine SET qty_in_stock = ? WHERE medicine_id = ?";
         return CrudUtil.execute(sql, newQty, medicineId);
     }
-
 
 }
