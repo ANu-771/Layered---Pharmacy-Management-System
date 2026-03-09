@@ -52,7 +52,7 @@ public class OrderDAOImpl implements OrderDAO {
 
     @Override
     public int getLatestOrderId() throws SQLException, ClassNotFoundException {
-        ResultSet rs = CrudUtil.execute("SELECT LAST_INSERT_ID()");
+        ResultSet rs = CrudUtil.execute("SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
         if (rs.next()) {
             return rs.getInt(1);
         }
