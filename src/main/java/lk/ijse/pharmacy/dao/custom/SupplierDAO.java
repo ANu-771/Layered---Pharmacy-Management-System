@@ -1,4 +1,7 @@
 package lk.ijse.pharmacy.dao.custom;
 
-public class SupplierDAO {
+import lk.ijse.pharmacy.dao.CrudDAO;
+import lk.ijse.pharmacy.entity.Supplier;
+
+public interface SupplierDAO extends CrudDAO<Supplier>{
 }

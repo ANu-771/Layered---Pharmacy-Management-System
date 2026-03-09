@@ -10,17 +10,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.DashboardBO;
+import lk.ijse.pharmacy.bo.custom.ReportBO;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
-import lk.ijse.pharmacy.model.DashboardModel;
 import lk.ijse.pharmacy.dto.tm.ReportTM;
-import lk.ijse.pharmacy.model.ReportModel;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +54,9 @@ public class ReportController {
     @FXML
     private TableColumn<ReportTM, Double> colTotal;
 
-    private DashboardModel dashboardModel = new DashboardModel();
-    private ReportModel reportModel = new ReportModel();
+    // 1. Get the BOs from BOFactory instead of using Models
+    DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
+    ReportBO reportBO = (ReportBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.REPORT);
 
     @FXML
     public void initialize() {
@@ -90,10 +90,10 @@ public class ReportController {
 
     private void loadSummaryLabels() {
         try {
-            lblTotalSales.setText(String.format("Rs. %.2f", dashboardModel.getTodayIncome()));
-
-            lblTotalOrders.setText(String.valueOf(reportModel.getTotalOrders()));
-            lblItemsSold.setText(String.valueOf(reportModel.getItemsSold()));
+            // 2. Call BO methods
+            lblTotalSales.setText(String.format("Rs. %.2f", dashboardBO.getTodayIncome()));
+            lblTotalOrders.setText(String.valueOf(reportBO.getTotalOrders()));
+            lblItemsSold.setText(String.valueOf(reportBO.getItemsSold()));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,9 +102,10 @@ public class ReportController {
 
     private void loadTableData() {
         try {
-            List<ReportTM> orders = reportModel.getAllOrderDetails();
+            // 3. Call BO method
+            List<ReportTM> orders = reportBO.getAllOrderDetails();
             tblReportDetails.setItems(FXCollections.observableArrayList(orders));
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -155,7 +156,8 @@ public class ReportController {
 
     private void printBillFromReport(int orderId, double orderTotal) {
         try {
-            double paidAmount = reportModel.getPaidAmount(orderId);
+            // 4. Call BO method
+            double paidAmount = reportBO.getPaidAmount(orderId);
             double balance = paidAmount - orderTotal;
 
             InputStream reportStream = getClass().getResourceAsStream("/report/bill.jrxml");

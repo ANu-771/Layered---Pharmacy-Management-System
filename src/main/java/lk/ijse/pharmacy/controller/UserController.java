@@ -6,8 +6,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.UserBO;
 import lk.ijse.pharmacy.dto.UserDTO;
-import lk.ijse.pharmacy.model.UserModel;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -36,7 +37,8 @@ public class UserController {
     @FXML
     private TableColumn<UserDTO, String> colRole;
 
-    private UserModel userModel = new UserModel();
+    // 1. Get the BO from the Factory (No more DAOs or Models here!)
+    UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.USER);
 
     @FXML
     public void initialize() {
@@ -67,10 +69,11 @@ public class UserController {
 
     private void loadAllUsers() {
         try {
-            List<UserDTO> userList = userModel.getAll();
+            // 2. Call the BO method
+            List<UserDTO> userList = userBO.getAllUsers();
             ObservableList<UserDTO> obList = FXCollections.observableArrayList(userList);
             tblUser.setItems(obList);
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to load users: " + e.getMessage()).show();
         }
     }
@@ -91,63 +94,27 @@ public class UserController {
             return;
         }
 
-        UserDTO user = new UserDTO(0, name, email, password);
+        // Fixed: Pass the role into the DTO directly
+        UserDTO user = new UserDTO(0, name, email, password, role);
 
         try {
-            if (userModel.save(user, role)) {
+            // 3. Save via BO
+            if (userBO.saveUser(user)) {
                 new Alert(Alert.AlertType.INFORMATION, "User Saved!").show();
                 btnClearOnAction(event);
                 loadAllUsers();
             } else {
                 new Alert(Alert.AlertType.ERROR, "Save Failed").show();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "SQL Error: " + e.getMessage()).show();
         }
     }
-
-//    @FXML
-//    void btnUpdateOnAction(ActionEvent event) {
-//        String idText = txtId.getText().trim();
-//
-//        // ID Validation
-//        if (idText.isEmpty() || !idText.matches("^\\d+$")) {
-//            new Alert(Alert.AlertType.WARNING, "Please enter a valid User ID!").show();
-//            return;
-//        }
-//
-//        int id = Integer.parseInt(idText);
-//        String name = txtUsername.getText().trim();
-//        String email = txtEmail.getText().trim();
-//        String password = txtPassword.getText();
-//        String role = cmbRole.getValue();
-//
-//        // Regex Validation Check
-//        if (!validateUserInput(name, email, password)) {
-//            return;
-//        }
-//
-//        UserDTO user = new UserDTO(id, name, email, password);
-//
-//        try {
-//            if (userModel.update(user, role)) {
-//                new Alert(Alert.AlertType.INFORMATION, "User Updated!").show();
-//                btnClearOnAction(event);
-//                loadAllUsers();
-//            } else {
-//                new Alert(Alert.AlertType.ERROR, "Update Failed. ID may not exist.").show();
-//            }
-//        } catch (SQLException e) {
-//            new Alert(Alert.AlertType.ERROR, "SQL Error: " + e.getMessage()).show();
-//        }
-//    }
-
 
     @FXML
     void btnUpdateOnAction(ActionEvent event) {
         String idText = txtId.getText().trim();
 
-        // ID Validation
         if (idText.isEmpty() || !idText.matches("^\\d+$")) {
             new Alert(Alert.AlertType.WARNING, "Please enter a valid User ID!").show();
             return;
@@ -159,7 +126,6 @@ public class UserController {
         String password = txtPassword.getText();
         String role = cmbRole.getValue();
 
-        // Regex Validation Check
         if (!validateUserInput(name, email, password)) {
             return;
         }
@@ -170,51 +136,26 @@ public class UserController {
 
         if (!confirmed) return;
 
-        UserDTO user = new UserDTO(id, name, email, password);
+        UserDTO user = new UserDTO(id, name, email, password, role);
 
         try {
-            if (userModel.update(user, role)) { //
+            // 4. Update via BO
+            if (userBO.updateUser(user)) {
                 new Alert(Alert.AlertType.INFORMATION, "User Updated!").show();
                 btnClearOnAction(event);
                 loadAllUsers();
             } else {
                 new Alert(Alert.AlertType.ERROR, "Update Failed. ID may not exist.").show();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "SQL Error: " + e.getMessage()).show();
         }
     }
-
-
-//    @FXML
-//    void btnDeleteOnAction(ActionEvent event) {
-//        String id = txtId.getText().trim();
-//
-//        // ID Validation
-//        if (id.isEmpty() || !id.matches("^\\d+$")) {
-//            new Alert(Alert.AlertType.WARNING, "Enter a valid User ID to delete").show();
-//            return;
-//        }
-//
-//        try {
-//            if (userModel.delete(id)) {
-//                new Alert(Alert.AlertType.INFORMATION, "User Deleted!").show();
-//                btnClearOnAction(event);
-//                loadAllUsers();
-//            } else {
-//                new Alert(Alert.AlertType.ERROR, "Delete Failed. User Not Found.").show();
-//            }
-//        } catch (SQLException e) {
-//            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-//        }
-//    }
-
 
     @FXML
     void btnDeleteOnAction(ActionEvent event) {
         String id = txtId.getText().trim();
 
-        // ID Validation
         if (id.isEmpty() || !id.matches("^\\d+$")) {
             new Alert(Alert.AlertType.WARNING, "Enter a valid User ID to delete").show();
             return;
@@ -227,14 +168,15 @@ public class UserController {
         if (!confirmed) return;
 
         try {
-            if (userModel.delete(id)) { //
+            // 5. Delete via BO (Convert String ID to int)
+            if (userBO.deleteUser(Integer.parseInt(id))) {
                 new Alert(Alert.AlertType.INFORMATION, "User Deleted!").show();
                 btnClearOnAction(event);
                 loadAllUsers();
             } else {
                 new Alert(Alert.AlertType.ERROR, "Delete Failed. User Not Found.").show();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }
     }
@@ -243,21 +185,21 @@ public class UserController {
     void txtSearchOnAction(ActionEvent event) {
         String id = txtId.getText().trim();
 
-        //ID Validation for Search
         if (id.isEmpty() || !id.matches("^\\d+$")) {
             new Alert(Alert.AlertType.WARNING, "Enter valid numeric ID").show();
             return;
         }
 
         try {
-            UserDTO user = userModel.search(id);
+            // 6. Search via BO
+            UserDTO user = userBO.searchUser(Integer.parseInt(id));
             if (user != null) {
                 populateFields(user);
             } else {
                 new Alert(Alert.AlertType.WARNING, "User not found").show();
                 btnClearOnAction(event);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -272,7 +214,6 @@ public class UserController {
         tblUser.getSelectionModel().clearSelection();
     }
 
-    //  Validation Method (Regex)
     private boolean validateUserInput(String username, String email, String password) {
         if (!username.matches("[A-Za-z ]{3,}")) {
             new Alert(Alert.AlertType.ERROR, "Invalid Username! Use letters only (A-Z).").show();

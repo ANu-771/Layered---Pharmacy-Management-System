@@ -1,55 +1,53 @@
 package lk.ijse.pharmacy.dao.custom.impl;
 
 import lk.ijse.pharmacy.dao.CrudUtil;
-import lk.ijse.pharmacy.dbconnection.DBConnection;
-import lk.ijse.pharmacy.dto.CustomerDTO;
-import org.apache.commons.collections.functors.WhileClosure;
+import lk.ijse.pharmacy.dao.custom.CustomerDAO;
+import lk.ijse.pharmacy.entity.Customer;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomerDAOImpl {
+public class CustomerDAOImpl implements CustomerDAO {
 
     // SAVE
-    public boolean save(CustomerDTO customer) throws SQLException, ClassNotFoundException {
-
+    @Override
+    public boolean save(Customer entity) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute(
                 "INSERT INTO customer (name, contact, address) VALUES (?,?,?)",
-                customer.getName(),
-                customer.getContact(),
-                customer.getAddress()
+                entity.getName(),
+                entity.getContact(),
+                entity.getAddress()
         );
     }
 
     // UPDATE
-    public boolean update(CustomerDTO customer) throws SQLException, ClassNotFoundException {
-
+    @Override
+    public boolean update(Customer entity) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute(
                 "UPDATE customer SET name = ?, contact = ?, address = ? WHERE customer_id = ?",
-                customer.getName(),
-                customer.getContact(),
-                customer.getAddress(),
-                customer.getCustomerId()
+                entity.getName(),
+                entity.getContact(),
+                entity.getAddress(),
+                entity.getCustomerId()
         );
     }
 
     // DELETE
+    @Override
     public boolean delete(int id) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("DELETE FROM customer WHERE customer_id = ?", id);
     }
 
-
     // GET ALL Customers TableView
-    public List<CustomerDTO> getAll() throws SQLException, ClassNotFoundException {
-        List<CustomerDTO> list = new ArrayList<>();
+    @Override
+    public List<Customer> getAll() throws SQLException, ClassNotFoundException {
+        List<Customer> list = new ArrayList<>();
 
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM customer");
         while (resultSet.next()) {
-            list.add(new CustomerDTO(
+            list.add(new Customer(
                     resultSet.getInt("customer_id"),
                     resultSet.getString("name"),
                     resultSet.getString("contact"),
@@ -61,11 +59,13 @@ public class CustomerDAOImpl {
     }
 
     // SEARCH Customer
-    public CustomerDTO search(int id) throws SQLException, ClassNotFoundException {
-        ResultSet resultSet = CrudUtil.execute("SELECT * FROM customer WHERE id = ?", id);
+    @Override
+    public Customer search(int id) throws SQLException, ClassNotFoundException {
+        // FIXED: Changed "id" to "customer_id" in the SQL query
+        ResultSet resultSet = CrudUtil.execute("SELECT * FROM customer WHERE customer_id = ?", id);
 
         if (resultSet.next()) {
-            return new CustomerDTO(
+            return new Customer(
                     resultSet.getInt("customer_id"),
                     resultSet.getString("name"),
                     resultSet.getString("contact"),

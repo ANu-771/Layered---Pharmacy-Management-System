@@ -7,8 +7,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.UserBO;
 import lk.ijse.pharmacy.dto.UserDTO;
-import lk.ijse.pharmacy.model.UserModel;
 import lk.ijse.pharmacy.util.EmailService;
 
 import java.sql.SQLException;
@@ -24,7 +25,8 @@ public class ForgotPasswordController {
     @FXML
     private Button btnCancel;
 
-    private UserModel userModel = new UserModel();
+    // Use UserBO from BOFactory instead of DAO/Model
+    UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.USER);
 
     @FXML
     void btnSendOnAction(ActionEvent event) {
@@ -43,7 +45,8 @@ public class ForgotPasswordController {
         }
 
         try {
-            UserDTO user = userModel.getUserByEmail(email);
+            // Call UserBO
+            UserDTO user = userBO.getUserByEmail(email);
 
             if (user == null) {
                 txtEmail.setStyle(errorStyle);
@@ -95,7 +98,7 @@ public class ForgotPasswordController {
                 });
             }).start();
 
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Database Error: " + e.getMessage()).show();
             e.printStackTrace();
         }

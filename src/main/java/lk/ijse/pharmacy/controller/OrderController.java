@@ -1,136 +1,68 @@
 package lk.ijse.pharmacy.controller;
 
-import javafx.event.ActionEvent;
-
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
-import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
-import lk.ijse.pharmacy.dao.custom.impl.OrderDAOImpl;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.geometry.Side;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.CustomerBO;
+import lk.ijse.pharmacy.bo.custom.MedicineBO;
+import lk.ijse.pharmacy.bo.custom.PlaceOrderBO;
 import lk.ijse.pharmacy.dbconnection.DBConnection;
 import lk.ijse.pharmacy.dto.CustomerDTO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.dto.OrderDTO;
+import lk.ijse.pharmacy.dto.OrderMedicineDTO;
+import lk.ijse.pharmacy.dto.PaymentDTO;
 import lk.ijse.pharmacy.dto.tm.CartTM;
-import lk.ijse.pharmacy.model.CustomerModel;
-import lk.ijse.pharmacy.model.MedicineModel;
-import lk.ijse.pharmacy.model.OrderModel;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.geometry.Side;
-
-import java.util.stream.Collectors;
-
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class OrderController {
 
-    @FXML
-    private ComboBox<String> cmbCustomerId;
-
-    @FXML
-    private ComboBox<String> cmbMedicineId;
-
-    @FXML
-    private TableView<CartTM> tblOrderCart;
-
-    @FXML
-    private TableColumn<CartTM, String> colMedicineId;
-
-    @FXML
-    private TableColumn<CartTM, String> colDescription;
-
-    @FXML
-    private TableColumn<CartTM, Integer> colQty;
-
-    @FXML
-    private TableColumn<CartTM, Double> colUnitPrice;
-
-    @FXML
-    private TableColumn<CartTM, Double> colLineTotal;
-
-    @FXML
-    private TableColumn<CartTM, Button> colAction;
-
-    @FXML
-    private Label lblCustomerName;
-
-    @FXML
-    private TextField txtDescription;
-
-    @FXML
-    private Label lblOrderDate;
-
-    @FXML
-    private Label lblQtyOnHand;
-
-    @FXML
-    private Label lblUnitPrice;
-
-    @FXML
-    private Label lblNetTotal;
-
-    @FXML
-    private TextField txtOrderId;
-
-    @FXML
-    private TextField txtQty;
-
-    @FXML
-    private ComboBox<String> cmbPaymentMethod;
-
-    @FXML
-    private TextField txtCash;
-
-    @FXML
-    private Label lblBalance;
-
-    private OrderModel orderModel = new OrderModel();
-    private CustomerModel customerModel = new CustomerModel();
-    private MedicineModel medicineModel = new MedicineModel();
-    private List<String> allMedicineNames = new ArrayList<>();
-
-    private MedicineDTO selectedMedicine = null;
+    @FXML private ComboBox<String> cmbCustomerId, cmbMedicineId, cmbPaymentMethod;
+    @FXML private TableView<CartTM> tblOrderCart;
+    @FXML private TableColumn<CartTM, String> colMedicineId, colDescription;
+    @FXML private TableColumn<CartTM, Integer> colQty;
+    @FXML private TableColumn<CartTM, Double> colUnitPrice, colLineTotal;
+    @FXML private TableColumn<CartTM, Button> colAction;
+    @FXML private Label lblCustomerName, lblOrderDate, lblQtyOnHand, lblUnitPrice, lblNetTotal, lblBalance;
+    @FXML private TextField txtDescription, txtOrderId, txtQty, txtCash;
 
     private ObservableList<CartTM> cartList = FXCollections.observableArrayList();
     private double netTotal = 0;
+    private MedicineDTO selectedMedicine = null;
+    private List<String> allMedicineNames = new ArrayList<>();
 
-    CustomerDAOImpl customerDAO = new CustomerDAOImpl();
-    MedicineDAOImpl medicineDAO = new MedicineDAOImpl();
-    OrderDAOImpl orderDAO = new OrderDAOImpl();
-
-
+    // BO Connections
+    CustomerBO customerBO = (CustomerBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.CUSTOMER);
+    MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
+    PlaceOrderBO placeOrderBO = (PlaceOrderBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.PLACE_ORDER);
 
     @FXML
     public void initialize() {
         setCellValueFactory();
-        loadNextOrderId();
         loadCustomerIds();
         loadMedicineIds();
         lblOrderDate.setText(String.valueOf(LocalDate.now()));
-
         loadMedicineNames();
         setupAutoSuggestion();
         setupPaymentLogic();
+
+        // Auto-generate a visual Order ID (Optional, depends on your PlaceOrderBO implementation)
+        txtOrderId.setText("Auto-Generated");
+        txtOrderId.setEditable(false);
     }
 
     private void setCellValueFactory() {
@@ -140,129 +72,72 @@ public class OrderController {
         colUnitPrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         colLineTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colAction.setCellValueFactory(new PropertyValueFactory<>("btnRemove"));
-
         tblOrderCart.setItems(cartList);
-    }
-
-    private void loadNextOrderId() {
-
-        try {
-            txtOrderId.setText(orderDAO.getNextOrderId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadCustomerIds() {
         try {
-            List<CustomerDTO> allCustomers = customerDAO.getAll();
+            List<CustomerDTO> allCustomers = customerBO.getAllCustomers();
             ObservableList<String> ids = FXCollections.observableArrayList();
-            for (CustomerDTO c : allCustomers) {
-                ids.add(String.valueOf(c.getCustomerId()));
-            }
+            for (CustomerDTO c : allCustomers) ids.add(String.valueOf(c.getCustomerId()));
             cmbCustomerId.setItems(ids);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void loadMedicineIds() {
         try {
-            List<MedicineDTO> allMedicines = medicineDAO.getAll();
+            List<MedicineDTO> allMedicines = medicineBO.getAllMedicines();
             ObservableList<String> ids = FXCollections.observableArrayList();
-            for (MedicineDTO m : allMedicines) {
-                ids.add(String.valueOf(m.getMedicineId()));
-            }
+            for (MedicineDTO m : allMedicines) ids.add(String.valueOf(m.getMedicineId()));
             cmbMedicineId.setItems(ids);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @FXML
     public void cmbCustomerOnAction(ActionEvent actionEvent) {
         String id = cmbCustomerId.getValue();
-
-        if (id == null) {
-            lblCustomerName.setText("");
-            return;
-        }
-
+        if (id == null) { lblCustomerName.setText(""); return; }
         try {
-            CustomerDTO customer = customerDAO.search(Integer.parseInt(id));
-            if (customer != null) {
-                lblCustomerName.setText(customer.getName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            CustomerDTO customer = customerBO.searchCustomer(Integer.parseInt(id));
+            if (customer != null) lblCustomerName.setText(customer.getName());
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @FXML
     public void cmbMedicineOnAction(ActionEvent actionEvent) {
         String id = cmbMedicineId.getValue();
-
-        if (id == null) {
-            return;
-        }
-
+        if (id == null) return;
         try {
-            MedicineDTO medicine = medicineDAO.search(Integer.parseInt(id));
+            MedicineDTO medicine = medicineBO.searchMedicine(Integer.parseInt(id));
             if (medicine != null) {
                 selectedMedicine = medicine;
-
                 txtDescription.setText(medicine.getMedName());
                 lblUnitPrice.setText(String.valueOf(medicine.getUnitPrice()));
                 lblQtyOnHand.setText(String.valueOf(medicine.getQtyInStock()));
                 txtQty.requestFocus();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     @FXML
     public void btnAddToCartOnAction(ActionEvent actionEvent) {
-        // med select chek krnw
         String medId = cmbMedicineId.getValue();
-        if (medId == null || selectedMedicine == null) {  // Check selectedMedicine too
+        if (medId == null || selectedMedicine == null) {
             new Alert(Alert.AlertType.WARNING, "Please select a medicine first!").show();
             return;
         }
 
-        // exp date validate and check
         try {
-            // Convert DTO Date to LocalDate
             java.time.LocalDate expDate = new java.sql.Date(selectedMedicine.getExpDate().getTime()).toLocalDate();
             java.time.LocalDate today = java.time.LocalDate.now();
+            if (expDate.isBefore(today)) { new Alert(Alert.AlertType.ERROR, "Cannot Sell! EXPIRED on: " + expDate).show(); return; }
+            if (expDate.isBefore(today.plusDays(21))) { new Alert(Alert.AlertType.WARNING, "Warning! Expires soon (" + expDate + "). Cannot add.").show(); return; }
+        } catch (Exception e) { e.printStackTrace(); return; }
 
-            // Is it already expired?
-            if (expDate.isBefore(today)) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Cannot Sell! This medicine EXPIRED on: " + expDate).show();
-                return; // Stop here
-            }
-
-            //Is it expiring soon.
-            if (expDate.isBefore(today.plusDays(21))) {
-                new Alert(Alert.AlertType.WARNING,
-                        "Warning! Medicine expires soon (" + expDate + "). Cannot add to bill.").show();
-                return;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
-
-
-        // qty enter krnld blnw
         String qtyText = txtQty.getText().trim();
         if (qtyText.isEmpty() || !qtyText.matches("\\d+") || Integer.parseInt(qtyText) <= 0) {
-            new Alert(Alert.AlertType.ERROR, "Invalid Quantity! Please enter a valid number.").show();
-            return;
+            new Alert(Alert.AlertType.ERROR, "Invalid Quantity!").show(); return;
         }
-
 
         try {
             String desc = txtDescription.getText();
@@ -270,87 +145,54 @@ public class OrderController {
             int qtyOnHand = Integer.parseInt(lblQtyOnHand.getText());
             int qty = Integer.parseInt(qtyText);
 
-            // stock check
-            if (qty > qtyOnHand) {
-                new Alert(Alert.AlertType.ERROR, "Out of Stock! You only have " + qtyOnHand + " items.").show();
-                return;
-            }
+            if (qty > qtyOnHand) { new Alert(Alert.AlertType.ERROR, "Out of Stock! Only " + qtyOnHand + " left.").show(); return; }
 
-            // add to my cart
-            Button btnRemove = new Button("Remove");
-            btnRemove.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
-
-            // total ek gnnw
             double total = qty * unitPrice;
-
-            // item already cart eke tyd blnw
-            CartTM existingItem = null;
-            for (CartTM tm : cartList) {
-                if (tm.getMedicineId().equals(medId)) {
-                    existingItem = tm;
-                    break;
-                }
-            }
+            CartTM existingItem = cartList.stream().filter(tm -> tm.getMedicineId().equals(medId)).findFirst().orElse(null);
 
             if (existingItem != null) {
                 int newQty = existingItem.getQty() + qty;
-                if (newQty > qtyOnHand) {
-                    new Alert(Alert.AlertType.ERROR, "Not enough stock to add more!").show();
-                    return;
-                }
+                if (newQty > qtyOnHand) { new Alert(Alert.AlertType.ERROR, "Not enough stock!").show(); return; }
                 existingItem.setQty(newQty);
                 existingItem.setTotal(newQty * unitPrice);
                 tblOrderCart.refresh();
             } else {
+                Button btnRemove = new Button("Remove");
+                btnRemove.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
                 CartTM newTm = new CartTM(medId, desc, qty, unitPrice, total, btnRemove);
-
-                btnRemove.setOnAction((e) -> {
-                    cartList.remove(newTm);
-                    calculateNetTotal();
-                });
-
+                btnRemove.setOnAction((e) -> { cartList.remove(newTm); calculateNetTotal(); });
                 cartList.add(newTm);
             }
-
             calculateNetTotal();
             txtQty.clear();
-
-        } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "Error reading medicine data. Please re-select the medicine.").show();
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void calculateNetTotal() {
-        netTotal = 0;
-        for (CartTM tm : cartList) {
-            netTotal += tm.getTotal();
-        }
-        lblNetTotal.setText(String.valueOf(netTotal));
+        netTotal = cartList.stream().mapToDouble(CartTM::getTotal).sum();
+        lblNetTotal.setText(String.format("%.2f", netTotal));
     }
 
     @FXML
     public void btnPlaceOrderOnAction(ActionEvent actionEvent) {
         String customerId = cmbCustomerId.getValue();
-
         if (customerId == null || cartList.isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Please select customer and add items to cart!").show();
+            new Alert(Alert.AlertType.ERROR, "Select customer and add items!").show();
             return;
         }
 
-        // Validate Payment Input
         String paymentMethod = cmbPaymentMethod.getValue();
         if (paymentMethod == null || paymentMethod.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Please select a Payment Method!").show();
+            new Alert(Alert.AlertType.WARNING, "Select a Payment Method!").show();
             return;
         }
 
-        //Ensure Cash amount is sufficient.
+        double cashAmount = netTotal;
         if ("Cash".equals(paymentMethod)) {
             try {
-                double cash = Double.parseDouble(txtCash.getText());
-                if (cash < netTotal) {
-                    new Alert(Alert.AlertType.ERROR, "Insufficient Cash provided!").show();
+                cashAmount = Double.parseDouble(txtCash.getText());
+                if (cashAmount < netTotal) {
+                    new Alert(Alert.AlertType.ERROR, "Insufficient Cash!").show();
                     return;
                 }
             } catch (NumberFormatException e) {
@@ -359,67 +201,115 @@ public class OrderController {
             }
         }
 
-
-        OrderDTO order = new OrderDTO(null, customerId, "1", netTotal, new Date());
-        List<CartTM> cartData = new ArrayList<>(cartList);
-
-        double cashAmount = 0.0;
-        if ("Cash".equals(paymentMethod)) {
-            try {
-                cashAmount = Double.parseDouble(txtCash.getText());
-            } catch (NumberFormatException e) {
-                cashAmount = netTotal;
-            }
-        } else {
-            cashAmount = netTotal;
-        }
-
-
         try {
-            String orderId = orderModel.placeOrder(order, cartData, paymentMethod, cashAmount);
-            // boolean isPlaced = orderModel.placeOrder(order, cartData);
+            // 1. Prepare DTOs for the Transaction
+            OrderDTO orderDTO = new OrderDTO(0, Integer.parseInt(customerId), 1, netTotal, new Date());
 
-            if (orderId != null) {
+            List<OrderMedicineDTO> orderDetails = new ArrayList<>();
+            for (CartTM tm : cartList) {
+                orderDetails.add(new OrderMedicineDTO(0, Integer.parseInt(tm.getMedicineId()), tm.getQty(), tm.getUnitPrice(), tm.getTotal()));
+            }
+
+            PaymentDTO paymentDTO = new PaymentDTO(0, 0, cashAmount, new java.sql.Timestamp(System.currentTimeMillis()), paymentMethod);
+
+            // 2. Execute Transaction via BO
+            boolean isPlaced = placeOrderBO.placeOrder(orderDTO, orderDetails, paymentDTO);
+
+            if (isPlaced) {
+                // 3. GET THE GENERATED ID AND PRINT THE BILL
+                // We fetch the latest ID to ensure the report shows the current order
+                int latestOrderId = placeOrderBO.getLatestOrderId();
+                double balance = Double.parseDouble(lblBalance.getText());
+
+                printBill(latestOrderId, balance);
+
                 new Alert(Alert.AlertType.INFORMATION, "Order Placed Successfully!").show();
 
-                double balance = 0.0;
-                if ("Cash".equals(paymentMethod)) {
-                    try {
-                        double cash = Double.parseDouble(txtCash.getText());
-                        balance = cash - netTotal;
-                    } catch (NumberFormatException e) {
-                        balance = 0.0;
-                    }
-                }
-
-                printBill(Integer.parseInt(orderId), balance);
-
+                // 4. Clear UI Fields
                 cartList.clear();
                 calculateNetTotal();
-                loadNextOrderId();
-
                 cmbMedicineId.getSelectionModel().clearSelection();
-                txtDescription.setText("");
+                txtDescription.clear();
                 lblQtyOnHand.setText("");
                 lblUnitPrice.setText("");
                 txtQty.clear();
                 txtCash.clear();
                 lblBalance.setText("0.00");
-
                 cmbCustomerId.getSelectionModel().clearSelection();
-                cmbCustomerId.setValue(null);
                 lblCustomerName.setText("");
-
             } else {
                 new Alert(Alert.AlertType.ERROR, "Order Failed!").show();
             }
-        } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "SQL Error: " + e.getMessage()).show();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
+            e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void txtSearchMedicineOnAction(ActionEvent actionEvent) {
+        String name = txtDescription.getText().trim();
+        try {
+            MedicineDTO medicine = medicineBO.searchMedicineByName(name);
+            if (medicine != null) {
+                selectedMedicine = medicine;
+                cmbMedicineId.setValue(String.valueOf(medicine.getMedicineId()));
+                lblUnitPrice.setText(String.valueOf(medicine.getUnitPrice()));
+                lblQtyOnHand.setText(String.valueOf(medicine.getQtyInStock()));
+                txtQty.requestFocus();
+            } else { new Alert(Alert.AlertType.WARNING, "Medicine not found!").show(); }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void setupPaymentLogic() {
+        cmbPaymentMethod.setItems(FXCollections.observableArrayList("Cash", "Card"));
+        cmbPaymentMethod.setValue("Cash");
+        txtCash.textProperty().addListener((obs, oldV, newV) -> calculateBalance());
+        cmbPaymentMethod.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            if ("Card".equals(newV)) {
+                txtCash.setDisable(true); lblBalance.setDisable(true); txtCash.clear(); lblBalance.setText("0.00");
+            } else {
+                txtCash.setDisable(false); lblBalance.setDisable(false); txtCash.requestFocus();
+            }
+        });
+    }
+
+    private void calculateBalance() {
+        try {
+            if (txtCash.getText().isEmpty()) { lblBalance.setText("0.00"); return; }
+            double balance = Double.parseDouble(txtCash.getText()) - netTotal;
+            lblBalance.setText(String.format("%.2f", balance));
+            lblBalance.setStyle(balance < 0 ? "-fx-text-fill: red;" : "-fx-text-fill: #22c55e;");
+        } catch (NumberFormatException e) { lblBalance.setText("Invalid"); }
+    }
+
+    private void loadMedicineNames() {
+        try {
+            allMedicineNames.clear();
+            for (MedicineDTO m : medicineBO.getAllMedicines()) allMedicineNames.add(m.getMedName());
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void setupAutoSuggestion() {
+        ContextMenu suggestionsMenu = new ContextMenu();
+        txtDescription.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null || newV.isEmpty()) { suggestionsMenu.hide(); return; }
+            List<String> matches = allMedicineNames.stream().filter(n -> n.toLowerCase().contains(newV.toLowerCase())).collect(Collectors.toList());
+            if (matches.isEmpty()) { suggestionsMenu.hide(); return; }
+            suggestionsMenu.getItems().clear();
+            for (String match : matches) {
+                MenuItem item = new MenuItem(match);
+                item.setOnAction(e -> { txtDescription.setText(match); suggestionsMenu.hide(); txtSearchMedicineOnAction(null); });
+                suggestionsMenu.getItems().add(item);
+            }
+            if (!suggestionsMenu.isShowing()) suggestionsMenu.show(txtDescription, Side.BOTTOM, 0, 0);
+        });
+        txtDescription.focusedProperty().addListener((obs, oldV, newV) -> { if (!newV) suggestionsMenu.hide(); });
     }
 
     private void printBill(int orderId, double balance) {
         try {
+            // 1. Load the Jasper Report file from your resources
             InputStream reportStream = getClass().getResourceAsStream("/report/bill.jrxml");
 
             if (reportStream == null) {
@@ -427,145 +317,22 @@ public class OrderController {
                 return;
             }
 
+            // 2. Set up the parameters (the same ones used in your JRXML file)
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("p_order_id", orderId);
             parameters.put("p_balance", balance);
 
+            // 3. Compile and Fill the report using the Database Connection
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
             Connection connection = DBConnection.getInstance().getConnection();
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
 
-            JasperViewer.viewReport(jasperPrint, false);
+            // 4. Show the report viewer
+            JasperViewer.viewReport(jasperPrint, false); // 'false' prevents closing the whole app when closing the report
 
         } catch (Exception e) {
             e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "Error printing bill: " + e.getMessage()).show();
+            new Alert(Alert.AlertType.ERROR, "Error generating bill: " + e.getMessage()).show();
         }
     }
-
-    @FXML
-    public void txtSearchMedicineOnAction(ActionEvent actionEvent) {
-        String name = txtDescription.getText().trim();
-
-        try {
-            MedicineDTO medicine = medicineDAO.searchByName(name);
-
-            if (medicine != null) {
-                selectedMedicine = medicine;
-
-                cmbMedicineId.setValue(String.valueOf(medicine.getMedicineId()));
-
-                lblUnitPrice.setText(String.valueOf(medicine.getUnitPrice()));
-                lblQtyOnHand.setText(String.valueOf(medicine.getQtyInStock()));
-
-                txtQty.requestFocus();
-            } else {
-                new Alert(Alert.AlertType.WARNING, "Medicine not found!").show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setupPaymentLogic() {
-        ObservableList<String> methods = FXCollections.observableArrayList("Cash", "Card");
-        cmbPaymentMethod.setItems(methods);
-        cmbPaymentMethod.setValue("Cash");
-
-        txtCash.textProperty().addListener((observable, oldValue, newValue) -> {
-            calculateBalance();
-        });
-
-        cmbPaymentMethod.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if ("Card".equals(newValue)) {
-                txtCash.setDisable(true);
-                lblBalance.setDisable(true);
-
-                txtCash.clear();
-                lblBalance.setText("0.00");
-            } else {
-                txtCash.setDisable(false);
-                lblBalance.setDisable(false);
-
-                txtCash.requestFocus();
-            }
-        });
-    }
-
-    private void calculateBalance() {
-        try {
-            if (txtCash.getText().isEmpty()) {
-                lblBalance.setText("0.00");
-                return;
-            }
-            double cash = Double.parseDouble(txtCash.getText());
-            double balance = cash - netTotal;
-
-            lblBalance.setText(String.format("%.2f", balance));
-
-            if (balance < 0) {
-                lblBalance.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 18;");
-            } else {
-                lblBalance.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold; -fx-font-size: 18;");
-            }
-
-        } catch (NumberFormatException e) {
-            lblBalance.setText("Invalid");
-        }
-    }
-
-    private void loadMedicineNames() {
-        try {
-            List<MedicineDTO> allMedicines = medicineDAO.getAll();
-            allMedicineNames.clear();
-            for (MedicineDTO m : allMedicines) {
-                allMedicineNames.add(m.getMedName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setupAutoSuggestion() {
-        ContextMenu suggestionsMenu = new ContextMenu();
-
-        txtDescription.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) {
-                suggestionsMenu.hide();
-                return;
-            }
-
-            List<String> matches = allMedicineNames.stream()
-                    .filter(name -> name.toLowerCase().contains(newValue.toLowerCase()))
-                    .collect(Collectors.toList());
-
-            if (matches.isEmpty()) {
-                suggestionsMenu.hide();
-                return;
-            }
-
-            suggestionsMenu.getItems().clear();
-            for (String match : matches) {
-                MenuItem item = new MenuItem(match);
-
-                item.setOnAction(event -> {
-                    txtDescription.setText(match);
-                    suggestionsMenu.hide();
-
-                    txtSearchMedicineOnAction(null);
-                });
-
-                suggestionsMenu.getItems().add(item);
-            }
-
-            if (!suggestionsMenu.isShowing()) {
-                suggestionsMenu.show(txtDescription, Side.BOTTOM, 0, 0);
-            }
-        });
-
-        txtDescription.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) suggestionsMenu.hide();
-        });
-    }
-
 }

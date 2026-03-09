@@ -8,59 +8,27 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import lk.ijse.pharmacy.dao.custom.impl.CustomerDAOImpl;
-import lk.ijse.pharmacy.dbconnection.DBConnection;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.CustomerBO;
 import lk.ijse.pharmacy.dto.CustomerDTO;
-import lk.ijse.pharmacy.model.CustomerModel;
-import javafx.scene.image.ImageView;
-
-import java.io.IOException;
-import java.sql.*;
-
+import java.sql.SQLException;
 
 public class CustomerController {
 
-    @FXML
-    private TextField txtId;
-    @FXML
-    private TextField txtName;
-    @FXML
-    private TextField txtContact;
-    @FXML
-    private TextField txtAddress;
+    @FXML private TextField txtId, txtName, txtContact, txtAddress;
+    @FXML private Button btnSave, btnDelete, btnUpdate, btnReset;
+    @FXML private TableView<CustomerDTO> tblCustomer;
+    @FXML private TableColumn<CustomerDTO, Integer> colId;
+    @FXML private TableColumn<CustomerDTO, String> colName, colContact, colAddress;
 
-    @FXML
-    private Button btnSave;
-    @FXML
-    private Button btnDelete;
-    @FXML
-    private Button btnUpdate;
-    @FXML
-    private Button btnReset;
-
-    @FXML
-    private TableView<CustomerDTO> tblCustomer;
-    @FXML
-    private TableColumn<CustomerDTO, Integer> colId;
-    @FXML
-    private TableColumn<CustomerDTO, String> colName;
-    @FXML
-    private TableColumn<CustomerDTO, String> colContact;
-    @FXML
-    private TableColumn<CustomerDTO, String> colAddress;
-
-    CustomerModel customerModel = new CustomerModel();
     ObservableList<CustomerDTO> customerList = FXCollections.observableArrayList();
 
-    CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+    // 1. Get the BO from BOFactory
+    CustomerBO customerBO = (CustomerBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.CUSTOMER);
 
     @FXML
     private void initialize() {
-
-
         loadAllCustomers();
-
-
         tblCustomer.setItems(customerList);
         colId.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -68,76 +36,57 @@ public class CustomerController {
         colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
 
         tblCustomer.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                populateFields(newValue);
-            }
+            if (newValue != null) populateFields(newValue);
         });
-
-
     }
 
     @FXML
     private void handlePressEnter(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             String id = txtId.getText() == null ? "" : txtId.getText().trim();
-
             if (!id.matches("^\\d+$")) {
                 new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
                 clearFields();
                 return;
             }
-
-            CustomerDTO customerDTO;
             try {
-                customerDTO = customerDAO.search(Integer.parseInt(id));
+                // 2. Search via BO
+                CustomerDTO customerDTO = customerBO.searchCustomer(Integer.parseInt(id));
                 if (customerDTO == null) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customer Not Found");
-                    alert.showAndWait();
+                    new Alert(Alert.AlertType.INFORMATION, "Customer Not Found").showAndWait();
                     clearFields();
                     return;
                 }
                 populateFields(customerDTO);
-
             } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customer Not Found");
-                alert.showAndWait();
+                new Alert(Alert.AlertType.INFORMATION, "Customer Not Found").showAndWait();
             }
         }
-
     }
 
-    //save
     @FXML
     private void btnSaveOnAction(ActionEvent event) {
-        int id = 0;
         String name = txtName.getText() == null ? "" : txtName.getText().trim();
         String contact = txtContact.getText() == null ? "" : txtContact.getText().trim();
         String address = txtAddress.getText() == null ? "" : txtAddress.getText().trim();
-
 
         if (name.isEmpty() || contact.isEmpty() || address.isEmpty()) {
             new Alert(Alert.AlertType.INFORMATION, "Please fill all the fields").show();
             return;
         }
+        if (!validateCustomerInput(name, contact, address)) return;
 
-        if (!validateCustomerInput(name, contact, address)) {
-            return;
-        }
-
-        // Loop through the existing list to see if this contact already exists
         for (CustomerDTO customer : customerList) {
             if (customer.getContact().equals(contact)) {
                 new Alert(Alert.AlertType.WARNING, "A customer with this Contact Number already exists!").show();
-                return; // Stop the save process
+                return;
             }
         }
 
-
-        CustomerDTO customer = new CustomerDTO(id, name, contact, address);
-
+        CustomerDTO customer = new CustomerDTO(0, name, contact, address);
         try {
-            boolean isSaved = customerDAO.save(customer); //cAll the model
-            if (isSaved) {
+            // 3. Save via BO
+            if (customerBO.saveCustomer(customer)) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Saved Successfully!").show();
                 loadAllCustomers();
                 clearFields();
@@ -146,101 +95,6 @@ public class CustomerController {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }
     }
-
-//    @FXML
-//    void btnDeleteOnAction(ActionEvent event) {
-//        String id = txtId.getText().trim() == null ? "" : txtId.getText().trim();
-//
-//        if (id.isEmpty()) {
-//            new Alert(Alert.AlertType.WARNING, "Please enter an ID to delete").show();
-//            return;
-//        }
-//        if (!id.matches("^\\d+$")) {
-//            new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
-//            return;
-//        }
-//
-//        try {
-//            boolean isDeleted = customerModel.delete(Integer.parseInt(id));
-//            if (isDeleted) {
-//                new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
-//                loadAllCustomers();
-//                clearFields();
-//            } else {
-//                new Alert(Alert.AlertType.WARNING, "Customer ID not found!").show();
-//            }
-//        } catch (SQLException | ClassNotFoundException e) {
-//            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-//        }
-//    }
-
-    @FXML
-    void btnDeleteOnAction(ActionEvent event) {
-        String id = txtId.getText().trim() == null ? "" : txtId.getText().trim();
-
-        if (id.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Please enter an ID to delete").show();
-            return;
-        }
-        if (!id.matches("^\\d+$")) {
-            new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
-            return;
-        }
-
-        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Deletion",
-                "Are you sure you want to delete this customer?",
-                "delete-alert");
-
-        if (!confirmed) return; // Stop if Cancel is clicked
-
-        try {
-            boolean isDeleted = customerDAO.delete(Integer.parseInt(id)); //
-            if (isDeleted) {
-                new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
-                loadAllCustomers();
-                clearFields();
-            } else {
-                new Alert(Alert.AlertType.WARNING, "Customer ID not found!").show();
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-        }
-    }
-
-//    @FXML
-//    void btnUpdateOnAction(ActionEvent event) {
-//        String id = txtId.getText() == null ? "" : txtId.getText().trim();
-//        String name = txtName.getText().trim();
-//        String contact = txtContact.getText().trim();
-//        String address = txtAddress.getText().trim();
-//
-//        if (!id.matches("^\\d+$")) {
-//            new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
-//            return;
-//        }
-//
-//        if (!validateCustomerInput(name, contact, address)) {
-//            return;
-//        }
-//
-//        CustomerDTO customer = new CustomerDTO(Integer.parseInt(id), name, contact, address);
-//
-//        try {
-//            boolean isUpdated = customerModel.update(customer);
-//            if (isUpdated) {
-//                new Alert(Alert.AlertType.INFORMATION, "Customer Updated Successfully!").show();
-//
-//                loadAllCustomers();
-//                clearFields();
-//
-//            } else {
-//                new Alert(Alert.AlertType.WARNING, "Customer ID not found!").show();
-//            }
-//        } catch (SQLException | ClassNotFoundException e) {
-//            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-//        }
-//    }
-
 
     @FXML
     void btnUpdateOnAction(ActionEvent event) {
@@ -253,22 +107,15 @@ public class CustomerController {
             new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
             return;
         }
+        if (!validateCustomerInput(name, contact, address)) return;
 
-        if (!validateCustomerInput(name, contact, address)) {
-            return;
-        }
-
-        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Update",
-                "Are you sure you want to update this customer's details?",
-                "update-alert");
-
-        if (!confirmed) return; // Stop if Cancel is clicked
+        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Update", "Are you sure you want to update this customer's details?", "update-alert");
+        if (!confirmed) return;
 
         CustomerDTO customer = new CustomerDTO(Integer.parseInt(idText), name, contact, address);
-
         try {
-            boolean isUpdated = customerDAO.update(customer);
-            if (isUpdated) {
+            // 4. Update via BO
+            if (customerBO.updateCustomer(customer)) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Updated Successfully!").show();
                 loadAllCustomers();
                 clearFields();
@@ -280,11 +127,35 @@ public class CustomerController {
         }
     }
 
+    @FXML
+    void btnDeleteOnAction(ActionEvent event) {
+        String id = txtId.getText().trim() == null ? "" : txtId.getText().trim();
+        if (id.isEmpty() || !id.matches("^\\d+$")) {
+            new Alert(Alert.AlertType.WARNING, "Please enter a valid ID to delete").show();
+            return;
+        }
+
+        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Deletion", "Are you sure you want to delete this customer?", "delete-alert");
+        if (!confirmed) return;
+
+        try {
+            // 5. Delete via BO
+            if (customerBO.deleteCustomer(Integer.parseInt(id))) {
+                new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
+                loadAllCustomers();
+                clearFields();
+            } else {
+                new Alert(Alert.AlertType.WARNING, "Customer ID not found!").show();
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
+        }
+    }
 
     private void loadAllCustomers() {
         try {
             customerList.clear();
-            customerList.setAll(customerDAO.getAll());
+            customerList.setAll(customerBO.getAllCustomers());
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }
@@ -295,28 +166,21 @@ public class CustomerController {
             new Alert(Alert.AlertType.ERROR, "Invalid Name! It must be more than 2 letters.").show();
             return false;
         }
-
         if (!contact.matches("^\\d{10}$")) {
             new Alert(Alert.AlertType.ERROR, "Invalid Contact! Must be exactly 10 numbers.").show();
             return false;
         }
-
         if (!address.matches("^[a-zA-Z0-9\\s]{3,}$")) {
             new Alert(Alert.AlertType.ERROR, "Invalid Address! Use only letters, numbers, and spaces.").show();
             return false;
         }
-
         return true;
     }
 
-
     @FXML
-    void btnResetOnAction(ActionEvent event) {
-        clearFields();
-    }
+    void btnResetOnAction(ActionEvent event) { clearFields(); }
 
     private void populateFields(CustomerDTO customerDTO) {
-
         txtId.setText(String.valueOf(customerDTO.getCustomerId()));
         txtName.setText(customerDTO.getName());
         txtContact.setText(customerDTO.getContact());
@@ -329,5 +193,4 @@ public class CustomerController {
         txtContact.clear();
         txtAddress.clear();
     }
-
 }

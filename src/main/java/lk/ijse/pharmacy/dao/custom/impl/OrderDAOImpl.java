@@ -1,58 +1,86 @@
 package lk.ijse.pharmacy.dao.custom.impl;
 
 import lk.ijse.pharmacy.dao.CrudUtil;
-import lk.ijse.pharmacy.dbconnection.DBConnection;
-import lk.ijse.pharmacy.dto.OrderDTO;
+import lk.ijse.pharmacy.dao.custom.OrderDAO;
+import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.entity.Order;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class OrderDAOImpl {
+public class OrderDAOImpl implements OrderDAO {
 
-    public String getNextOrderId() throws SQLException, ClassNotFoundException {
-        String sql = "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1";
-        ResultSet resultSet = DBConnection.getInstance().getConnection().createStatement().executeQuery(sql);
+    @Override
+    public boolean save(Order entity) throws SQLException, ClassNotFoundException {
+        return CrudUtil.execute("INSERT INTO orders (customer_id, user_id, total, order_date, order_time) VALUES (?, ?, ?, ?, ?)",
+                entity.getCustomerId(), entity.getUserId(), entity.getTotal(),
+                new java.sql.Date(entity.getOrderDate().getTime()), new java.sql.Time(entity.getOrderTime().getTime()));
+    }
 
-        if (resultSet.next()) {
-            return splitOrderId(resultSet.getString(1));
+    @Override
+    public boolean update(Order entity) throws SQLException, ClassNotFoundException {
+        return false; // Orders usually aren't updated
+    }
+
+    @Override
+    public boolean delete(int id) throws SQLException, ClassNotFoundException {
+        return false; // Orders usually aren't deleted
+    }
+
+    @Override
+    public List<Order> getAll() throws SQLException, ClassNotFoundException {
+        List<Order> list = new ArrayList<>();
+        ResultSet rs = CrudUtil.execute("SELECT * FROM orders");
+        while(rs.next()) {
+            list.add(new Order(rs.getInt("order_id"), rs.getInt("customer_id"), rs.getInt("user_id"),
+                    rs.getDouble("total"), rs.getDate("order_date"), rs.getTime("order_time")));
         }
-        return "1";
+        return list;
     }
 
-    private String splitOrderId(String currentId) {
-        if (currentId != null) {
-            return String.valueOf(Integer.parseInt(currentId) + 1);
+    @Override
+    public Order search(int id) throws SQLException, ClassNotFoundException {
+        ResultSet rs = CrudUtil.execute("SELECT * FROM orders WHERE order_id=?", id);
+        if(rs.next()) {
+            return new Order(rs.getInt("order_id"), rs.getInt("customer_id"), rs.getInt("user_id"),
+                    rs.getDouble("total"), rs.getDate("order_date"), rs.getTime("order_time"));
         }
-        return "1";
+        return null;
     }
 
-
-    public boolean saveOrder(OrderDTO orderDTO) throws SQLException {
-        String sqlOrder = "INSERT INTO orders (customer_id, user_id, total, order_date, order_time) VALUES (?, ?, ?, ?, ?)";
-
-        return CrudUtil.execute(
-                sqlOrder,
-                orderDTO.getCustomerId(),
-                orderDTO.getUserId(),
-                orderDTO.getTotal(),
-                new java.sql.Date(orderDTO.getOrderDate().getTime()),
-                new java.sql.Time(orderDTO.getOrderDate().getTime())
-        );
-    }
-
-    public int getLastOrderId() throws SQLException, ClassNotFoundException {
-        String sql = "SELECT LAST_INSERT_ID() AS order_id FROM orders";
-        ResultSet rs = CrudUtil.execute(sql);
-
+    @Override
+    public int getLatestOrderId() throws SQLException, ClassNotFoundException {
+        // This SQL returns the most recently generated auto-increment ID in the current session
+        ResultSet rs = CrudUtil.execute("SELECT LAST_INSERT_ID()");
         if (rs.next()) {
-            return rs.getInt("order_id");
+            return rs.getInt(1);
         }
-
-        else {
-            throw  new SQLException("Order ID not found");
-        }
+        return 0;
     }
 
+    @Override
+    public int getTotalOrders() throws SQLException, ClassNotFoundException {
+        ResultSet rs = CrudUtil.execute("SELECT COUNT(*) FROM orders");
+        if (rs.next()) return rs.getInt(1);
+        return 0;
+    }
 
-
+    @Override
+    public List<CustomEntity> getAllOrderDetails() throws SQLException, ClassNotFoundException {
+        List<CustomEntity> list = new ArrayList<>();
+        String sql = "SELECT o.order_id, c.name, o.order_date, o.total FROM orders o JOIN customer c ON o.customer_id = c.customer_id ORDER BY o.order_date DESC, o.order_id DESC";
+        ResultSet rs = CrudUtil.execute(sql);
+        while (rs.next()) {
+            // Assuming CustomEntity has these fields
+            CustomEntity entity = new CustomEntity();
+            entity.setOrderId(rs.getInt("order_id"));
+            entity.setCustomerName(rs.getString("name"));
+            entity.setDate(rs.getString("order_date"));
+            entity.setTotalCost(rs.getDouble("total"));
+            list.add(entity);
+        }
+        return list;
+    }
 }

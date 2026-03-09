@@ -7,14 +7,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.geometry.Side;
-import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
-import lk.ijse.pharmacy.dao.custom.impl.SupplierDAOImpl;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.MedicineBO;
+import lk.ijse.pharmacy.bo.custom.SupplierBO;
+import lk.ijse.pharmacy.bo.custom.SupplyBO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.dto.SupplierDTO;
 import lk.ijse.pharmacy.dto.tm.SupplyRecordTM;
-import lk.ijse.pharmacy.model.MedicineModel;
-import lk.ijse.pharmacy.model.SupplierModel;
-import lk.ijse.pharmacy.model.SupplyModel;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,49 +21,30 @@ import java.util.stream.Collectors;
 
 public class SupplyController {
 
-    @FXML
-    private ComboBox<String> cmbSupplierId;
-    @FXML
-    private TextField txtSupplierName;
-    @FXML
-    private DatePicker dpSupplyDate;
+    @FXML private ComboBox<String> cmbSupplierId;
+    @FXML private TextField txtSupplierName;
+    @FXML private DatePicker dpSupplyDate;
+    @FXML private ComboBox<String> cmbMedicineId;
+    @FXML private TextField txtDescription;
+    @FXML private TextField txtBuyingPrice;
+    @FXML private TextField txtQty;
 
-    @FXML
-    private ComboBox<String> cmbMedicineId;
-    @FXML
-    private TextField txtDescription;
-    @FXML
-    private TextField txtBuyingPrice;
-    @FXML
-    private TextField txtQty;
-
-    @FXML
-    private TableView<SupplyRecordTM> tblSupplyRecord;
-    @FXML
-    private TableColumn<SupplyRecordTM, String> colHistoryDate;
-    @FXML
-    private TableColumn<SupplyRecordTM, Integer> colHistorySupId;
-    @FXML
-    private TableColumn<SupplyRecordTM, String> colHistorySupName;
-    @FXML
-    private TableColumn<SupplyRecordTM, String> colHistoryMedName;
-    @FXML
-    private TableColumn<SupplyRecordTM, Integer> colHistoryQty;
-    @FXML
-    private TableColumn<SupplyRecordTM, Double> colHistoryUnitCost;
-    @FXML
-    private TableColumn<SupplyRecordTM, Double> colHistoryTotalCost;
-
-    private SupplierModel supplierModel = new SupplierModel();
-    private MedicineModel medicineModel = new MedicineModel();
-    private SupplyModel supplyModel = new SupplyModel();
+    @FXML private TableView<SupplyRecordTM> tblSupplyRecord;
+    @FXML private TableColumn<SupplyRecordTM, String> colHistoryDate;
+    @FXML private TableColumn<SupplyRecordTM, Integer> colHistorySupId;
+    @FXML private TableColumn<SupplyRecordTM, String> colHistorySupName;
+    @FXML private TableColumn<SupplyRecordTM, String> colHistoryMedName;
+    @FXML private TableColumn<SupplyRecordTM, Integer> colHistoryQty;
+    @FXML private TableColumn<SupplyRecordTM, Double> colHistoryUnitCost;
+    @FXML private TableColumn<SupplyRecordTM, Double> colHistoryTotalCost;
 
     private List<SupplierDTO> allSuppliers;
     private List<MedicineDTO> allMedicines;
 
-    MedicineDAOImpl  medicineDAO = new MedicineDAOImpl();
-    SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
-
+    // Call Business Objects (BO) from BOFactory
+    SupplyBO supplyBO = (SupplyBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SUPPLY);
+    SupplierBO supplierBO = (SupplierBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SUPPLIER);
+    MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
 
     public void initialize() {
         dpSupplyDate.setValue(LocalDate.now());
@@ -89,7 +69,7 @@ public class SupplyController {
 
     private void loadHistoryTable() {
         try {
-            List<SupplyRecordTM> history = supplyModel.getAllSupplies();
+            List<SupplyRecordTM> history = supplyBO.getAllSupplies();
             tblSupplyRecord.setItems(FXCollections.observableArrayList(history));
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +103,7 @@ public class SupplyController {
             double unitCost = Double.parseDouble(txtBuyingPrice.getText());
             double totalCost = qty * unitCost;
 
-            boolean isSaved = supplyModel.saveSupply(Integer.parseInt(cmbSupplierId.getValue()),medName,
+            boolean isSaved = supplyBO.saveSupply(Integer.parseInt(cmbSupplierId.getValue()), medName,
                     dpSupplyDate.getValue(), qty, unitCost, totalCost);
 
             if (isSaved) {
@@ -142,7 +122,7 @@ public class SupplyController {
     }
 
     private void clearFields() {
-        cmbMedicineId.getSelectionModel().clearSelection(); // Clear ID
+        cmbMedicineId.getSelectionModel().clearSelection();
         txtDescription.clear();
         txtBuyingPrice.clear();
         txtQty.clear();
@@ -150,15 +130,13 @@ public class SupplyController {
 
     private void loadAllData() {
         try {
-            allSuppliers = supplierDAO.getAll();
-            allMedicines = medicineDAO.getAll();
+            allSuppliers = supplierBO.getAllSuppliers();
+            allMedicines = medicineBO.getAllMedicines();
 
-            // Load Supplier ID
             ObservableList<String> supIds = FXCollections.observableArrayList();
             for (SupplierDTO s : allSuppliers) supIds.add(String.valueOf(s.getSupplierId()));
             cmbSupplierId.setItems(supIds);
 
-            // Load Medicine ID
             ObservableList<String> medIds = FXCollections.observableArrayList();
             for (MedicineDTO m : allMedicines) medIds.add(String.valueOf(m.getMedicineId()));
             cmbMedicineId.setItems(medIds);

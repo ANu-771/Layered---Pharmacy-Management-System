@@ -6,92 +6,50 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import lk.ijse.pharmacy.dao.custom.impl.MedicineDAOImpl;
+import javafx.geometry.Side;
+import lk.ijse.pharmacy.bo.BOFactory;
+import lk.ijse.pharmacy.bo.custom.MedicineBO;
 import lk.ijse.pharmacy.dto.MedicineDTO;
-import lk.ijse.pharmacy.model.MedicineModel;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.geometry.Side;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.scene.control.TableRow;
-
 public class MedicineController {
 
-    @FXML
-    private Button btnClear, btnDelete, btnSave, btnUpdate;
+    @FXML private Button btnClear, btnDelete, btnSave, btnUpdate;
+    @FXML private TableColumn<MedicineDTO, String> colBrand, colExpDate, colName;
+    @FXML private TableColumn<MedicineDTO, Integer> colId, colQty;
+    @FXML private TableColumn<MedicineDTO, Double> colPrice;
+    @FXML private DatePicker dpExpDate;
+    @FXML private TableView<MedicineDTO> tblMedicine;
+    @FXML private TextField txtBrand, txtId, txtName, txtPrice, txtQty;
 
-    @FXML
-    private TableColumn<MedicineDTO, String> colBrand;
-
-    @FXML
-    private TableColumn<MedicineDTO, String> colExpDate;
-
-    @FXML
-    private TableColumn<MedicineDTO, Integer> colId;
-
-    @FXML
-    private TableColumn<MedicineDTO, String> colName;
-
-    @FXML
-    private TableColumn<MedicineDTO, Double> colPrice;
-
-    @FXML
-    private TableColumn<MedicineDTO, Integer> colQty;
-
-    @FXML
-    private DatePicker dpExpDate;
-
-    @FXML
-    private TableView<MedicineDTO> tblMedicine;
-
-    @FXML
-    private TextField txtBrand, txtId, txtName, txtPrice, txtQty;
-
-
-    private MedicineModel medicineModel = new MedicineModel();
     private ObservableList<MedicineDTO> medicineList = FXCollections.observableArrayList();
     private List<String> allMedicineNames = new ArrayList<>();
 
-
-    MedicineDAOImpl medicineDAO = new MedicineDAOImpl();
-
+    // ALWAYS USE BO! NOT DAO!
+    MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
 
     @FXML
     private void initialize() {
         loadAllMedicines();
         setupTable();
-
-        loadMedicineNames();    // Load names into memory
+        loadMedicineNames();
         setupAutoSuggestion();
 
         tblMedicine.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) populateFields(newVal);
         });
 
-        txtPrice.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*(\\.\\d*)?")) {
-                txtPrice.setText(oldValue);
-            }
-        });
-
-        txtQty.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                txtQty.setText(oldValue);
-            }
-        });
+        txtPrice.textProperty().addListener((obs, oldV, newV) -> { if (!newV.matches("\\d*(\\.\\d*)?")) txtPrice.setText(oldV); });
+        txtQty.textProperty().addListener((obs, oldV, newV) -> { if (!newV.matches("\\d*")) txtQty.setText(oldV); });
     }
 
     @FXML
@@ -113,10 +71,11 @@ public class MedicineController {
         int qty = Integer.parseInt(qtyText);
         Date expDate = Date.from(localExpDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        MedicineDTO medicine = new MedicineDTO(name, brand, qty, price, expDate);
+        // FIXED: Added '0' for the auto-increment ID
+        MedicineDTO medicine = new MedicineDTO(0, name, brand, qty, price, expDate);
 
         try {
-            if (medicineDAO.save(medicine)) {
+            if (medicineBO.saveMedicine(medicine)) {
                 new Alert(Alert.AlertType.INFORMATION, "Medicine Saved Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -126,52 +85,10 @@ public class MedicineController {
         }
     }
 
-//    @FXML
-//    void btnUpdateOnAction(ActionEvent event) {
-//        String idText = txtId.getText().trim();
-//        if (idText.isEmpty()) {
-//            new Alert(Alert.AlertType.WARNING, "Select a medicine to update!").show();
-//            return;
-//        }
-//
-//        String name = txtName.getText().trim();
-//        String brand = txtBrand.getText().trim();
-//        String priceText = txtPrice.getText().trim();
-//        String qtyText = txtQty.getText().trim();
-//        LocalDate localExpDate = dpExpDate.getValue();
-//
-//        if (name.isEmpty() || brand.isEmpty() || priceText.isEmpty() || qtyText.isEmpty() || localExpDate == null) {
-//            new Alert(Alert.AlertType.WARNING, "Please fill all fields!").show();
-//            return;
-//        }
-//
-//        if (!validateInput(priceText, qtyText)) return;
-//
-//        int id = Integer.parseInt(idText);
-//        double price = Double.parseDouble(priceText);
-//        int qty = Integer.parseInt(qtyText);
-//        Date expDate = Date.from(localExpDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-//
-//        MedicineDTO medicine = new MedicineDTO(id, name, brand, qty, price, expDate);
-//
-//        try {
-//            if (medicineModel.update(medicine)) {
-//                new Alert(Alert.AlertType.INFORMATION, "Updated Successfully!").show();
-//                loadAllMedicines();
-//                clearFields();
-//            }
-//        } catch (SQLException | ClassNotFoundException e) {
-//            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-//        }
-//    }
-
     @FXML
     void btnUpdateOnAction(ActionEvent event) {
         String idText = txtId.getText().trim();
-        if (idText.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Select a medicine to update!").show();
-            return;
-        }
+        if (idText.isEmpty()) return;
 
         String name = txtName.getText().trim();
         String brand = txtBrand.getText().trim();
@@ -179,17 +96,8 @@ public class MedicineController {
         String qtyText = txtQty.getText().trim();
         LocalDate localExpDate = dpExpDate.getValue();
 
-        if (name.isEmpty() || brand.isEmpty() || priceText.isEmpty() || qtyText.isEmpty() || localExpDate == null) {
-            new Alert(Alert.AlertType.WARNING, "Please fill all fields!").show();
-            return;
-        }
-
         if (!validateInput(priceText, qtyText)) return;
-
-        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Update",
-                "Are you sure you want to update this record?",
-                "update-alert");
-
+        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Update", "Update this record?", "update-alert");
         if (!confirmed) return;
 
         int id = Integer.parseInt(idText);
@@ -200,7 +108,7 @@ public class MedicineController {
         MedicineDTO medicine = new MedicineDTO(id, name, brand, qty, price, expDate);
 
         try {
-            if (medicineDAO.update(medicine)) {
+            if (medicineBO.updateMedicine(medicine)) {
                 new Alert(Alert.AlertType.INFORMATION, "Updated Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -210,40 +118,15 @@ public class MedicineController {
         }
     }
 
-//    @FXML
-//    void btnDeleteOnAction(ActionEvent event) {
-//        String idText = txtId.getText().trim();
-//        if (idText.isEmpty()) {
-//            new Alert(Alert.AlertType.WARNING, "Select a medicine to delete!").show();
-//            return;
-//        }
-//        try {
-//            if (medicineModel.delete(Integer.parseInt(idText))) {
-//                new Alert(Alert.AlertType.INFORMATION, "Deleted Successfully!").show();
-//                loadAllMedicines();
-//                clearFields();
-//            }
-//        } catch (SQLException | ClassNotFoundException e) {
-//            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
-//        }
-//    }
-
     @FXML
     void btnDeleteOnAction(ActionEvent event) {
         String idText = txtId.getText().trim();
-        if (idText.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Select a medicine to delete!").show();
-            return;
-        }
-
-        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Deletion",
-                "Are you sure you want to delete this medicine?",
-                "delete-alert");
-
+        if (idText.isEmpty()) return;
+        boolean confirmed = lk.ijse.pharmacy.util.AlertUtil.showConfirmation("Confirm Deletion", "Delete this medicine?", "delete-alert");
         if (!confirmed) return;
 
         try {
-            if (medicineDAO.delete(Integer.parseInt(idText))) { //
+            if (medicineBO.deleteMedicine(Integer.parseInt(idText))) {
                 new Alert(Alert.AlertType.INFORMATION, "Deleted Successfully!").show();
                 loadAllMedicines();
                 clearFields();
@@ -258,37 +141,22 @@ public class MedicineController {
         if (event.getCode() == KeyCode.ENTER) {
             String idText = txtId.getText().trim();
             String nameText = txtName.getText().trim();
-
             MedicineDTO medicineDTO = null;
 
             try {
-                if (!idText.isEmpty()) {
-                    if (idText.matches("^\\d+$")) {
-                        medicineDTO = medicineDAO.search(Integer.parseInt(idText));
-                    } else {
-                        new Alert(Alert.AlertType.WARNING, "Invalid ID format!").show();
-                        return;
-                    }
+                if (!idText.isEmpty() && idText.matches("^\\d+$")) {
+                    medicineDTO = medicineBO.searchMedicine(Integer.parseInt(idText));
                 } else if (!nameText.isEmpty()) {
-                    medicineDTO = medicineDAO.searchByName(nameText);
-                } else {
-                    new Alert(Alert.AlertType.WARNING, "Please enter an ID or Name to search!").show();
-                    return;
+                    medicineDTO = medicineBO.searchMedicineByName(nameText);
                 }
 
-                if (medicineDTO != null) {
-                    populateFields(medicineDTO);
-                } else {
-                    new Alert(Alert.AlertType.INFORMATION, "Medicine Not Found").showAndWait();
-                    clearFields();
-                }
-
+                if (medicineDTO != null) populateFields(medicineDTO);
+                else { new Alert(Alert.AlertType.INFORMATION, "Medicine Not Found").showAndWait(); clearFields(); }
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, "Error searching: " + e.getMessage()).show();
             }
         }
     }
-
 
     private void setupTable() {
         tblMedicine.setItems(medicineList);
@@ -299,33 +167,18 @@ public class MedicineController {
         colExpDate.setCellValueFactory(new PropertyValueFactory<>("expDate"));
         colQty.setCellValueFactory(new PropertyValueFactory<>("qtyInStock"));
 
-
         tblMedicine.setRowFactory(tv -> new TableRow<MedicineDTO>() {
             @Override
             protected void updateItem(MedicineDTO item, boolean empty) {
                 super.updateItem(item, empty);
-
-                if (item == null || empty || item.getExpDate() == null) {
-                    setStyle("");
-                } else {
-
+                if (item == null || empty || item.getExpDate() == null) setStyle("");
+                else {
                     java.time.LocalDate expDate = new java.sql.Date(item.getExpDate().getTime()).toLocalDate();
                     java.time.LocalDate today = java.time.LocalDate.now();
-
-                    if (expDate.isBefore(today)) {
-                        // Deep Red
-                        setStyle("-fx-background-color: #ff9999; -fx-text-background-color: white;");
-                    } else if (expDate.isBefore(today.plusDays(21))) {
-                        // EXPIRING SOON (Next 21 Days): Light Red
-                        setStyle("-fx-background-color: #ffcdd2;");
-                    }
-                    // LOW STOCK (Yellow)
-                    else if (item.getQtyInStock() <= 21) {
-                        setStyle("-fx-background-color: #fef08a; -fx-text-background-color: black;");
-                    } else {
-                        // Clear style
-                        setStyle("");
-                    }
+                    if (expDate.isBefore(today)) setStyle("-fx-background-color: #ff9999; -fx-text-background-color: white;");
+                    else if (expDate.isBefore(today.plusDays(21))) setStyle("-fx-background-color: #ffcdd2;");
+                    else if (item.getQtyInStock() <= 21) setStyle("-fx-background-color: #fef08a; -fx-text-background-color: black;");
+                    else setStyle("");
                 }
             }
         });
@@ -334,13 +187,9 @@ public class MedicineController {
     private void loadAllMedicines() {
         try {
             medicineList.clear();
-            medicineList.addAll(medicineDAO.getAll());
-
+            medicineList.addAll(medicineBO.getAllMedicines());
             loadMedicineNames();
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException | ClassNotFoundException e) { e.printStackTrace(); }
     }
 
     private boolean validateInput(String price, String qty) {
@@ -353,85 +202,40 @@ public class MedicineController {
         txtBrand.setText(dto.getBrand());
         txtPrice.setText(String.valueOf(dto.getUnitPrice()));
         txtQty.setText(String.valueOf(dto.getQtyInStock()));
-        if (dto.getExpDate() != null) {
-            dpExpDate.setValue(new java.sql.Date(dto.getExpDate().getTime()).toLocalDate());
-        }
+        if (dto.getExpDate() != null) dpExpDate.setValue(new java.sql.Date(dto.getExpDate().getTime()).toLocalDate());
     }
 
     private void loadMedicineNames() {
         try {
-            List<MedicineDTO> allMedicines = medicineDAO.getAll();
             allMedicineNames.clear();
-            for (MedicineDTO m : allMedicines) {
-                allMedicineNames.add(m.getMedName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            for (MedicineDTO m : medicineBO.getAllMedicines()) allMedicineNames.add(m.getMedName());
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // Set up the popup listener
     private void setupAutoSuggestion() {
         ContextMenu suggestionsMenu = new ContextMenu();
-
-        txtName.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) {
-                suggestionsMenu.hide();
-                return;
-            }
-
-            List<String> matches = allMedicineNames.stream()
-                    .filter(name -> name.toLowerCase().contains(newValue.toLowerCase()))
-                    .collect(Collectors.toList());
-
-            if (matches.isEmpty()) {
-                suggestionsMenu.hide();
-                return;
-            }
-
+        txtName.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null || newV.isEmpty()) { suggestionsMenu.hide(); return; }
+            List<String> matches = allMedicineNames.stream().filter(n -> n.toLowerCase().contains(newV.toLowerCase())).collect(Collectors.toList());
+            if (matches.isEmpty()) { suggestionsMenu.hide(); return; }
             suggestionsMenu.getItems().clear();
             for (String match : matches) {
                 MenuItem item = new MenuItem(match);
-
-                item.setOnAction(event -> {
-                    txtName.setText(match);
-                    suggestionsMenu.hide();
-
+                item.setOnAction(e -> {
+                    txtName.setText(match); suggestionsMenu.hide();
                     try {
-                        MedicineDTO medicine = medicineDAO.searchByName(match);
-                        if (medicine != null) {
-                            populateFields(medicine);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                        MedicineDTO medicine = medicineBO.searchMedicineByName(match);
+                        if (medicine != null) populateFields(medicine);
+                    } catch (Exception ex) { ex.printStackTrace(); }
                 });
-
                 suggestionsMenu.getItems().add(item);
             }
-
-            if (!suggestionsMenu.isShowing()) {
-                suggestionsMenu.show(txtName, Side.BOTTOM, 0, 0);
-            }
+            if (!suggestionsMenu.isShowing()) suggestionsMenu.show(txtName, Side.BOTTOM, 0, 0);
         });
-
-        txtName.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) suggestionsMenu.hide();
-        });
+        txtName.focusedProperty().addListener((obs, oldV, newV) -> { if (!newV) suggestionsMenu.hide(); });
     }
 
+    @FXML void btnClearOnAction(ActionEvent event) { clearFields(); }
 
-    @FXML
-    void btnClearOnAction(ActionEvent event) {
-        clearFields();
-    }
-
-    private void clearFields() {
-        txtId.clear();
-        txtName.clear();
-        txtBrand.clear();
-        txtPrice.clear();
-        txtQty.clear();
-        dpExpDate.setValue(null);
-    }
+    private void clearFields() { txtId.clear(); txtName.clear(); txtBrand.clear(); txtPrice.clear(); txtQty.clear(); dpExpDate.setValue(null); }
 }
