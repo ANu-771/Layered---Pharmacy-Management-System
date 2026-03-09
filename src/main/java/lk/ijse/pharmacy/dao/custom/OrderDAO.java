@@ -12,5 +12,6 @@ public interface OrderDAO extends CrudDAO<Order> {
     int getLatestOrderId() throws SQLException, ClassNotFoundException;
 
     int getTotalOrders() throws SQLException, ClassNotFoundException;
+
     List<CustomEntity> getAllOrderDetails() throws SQLException, ClassNotFoundException;
 }

@@ -15,15 +15,19 @@ import java.sql.SQLException;
 
 public class CustomerController {
 
-    @FXML private TextField txtId, txtName, txtContact, txtAddress;
-    @FXML private Button btnSave, btnDelete, btnUpdate, btnReset;
-    @FXML private TableView<CustomerDTO> tblCustomer;
-    @FXML private TableColumn<CustomerDTO, Integer> colId;
-    @FXML private TableColumn<CustomerDTO, String> colName, colContact, colAddress;
+    @FXML
+    private TextField txtId, txtName, txtContact, txtAddress;
+    @FXML
+    private Button btnSave, btnDelete, btnUpdate, btnReset;
+    @FXML
+    private TableView<CustomerDTO> tblCustomer;
+    @FXML
+    private TableColumn<CustomerDTO, Integer> colId;
+    @FXML
+    private TableColumn<CustomerDTO, String> colName, colContact, colAddress;
 
     ObservableList<CustomerDTO> customerList = FXCollections.observableArrayList();
 
-    // 1. Get the BO from BOFactory
     CustomerBO customerBO = (CustomerBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.CUSTOMER);
 
     @FXML
@@ -50,7 +54,6 @@ public class CustomerController {
                 return;
             }
             try {
-                // 2. Search via BO
                 CustomerDTO customerDTO = customerBO.searchCustomer(Integer.parseInt(id));
                 if (customerDTO == null) {
                     new Alert(Alert.AlertType.INFORMATION, "Customer Not Found").showAndWait();
@@ -85,7 +88,6 @@ public class CustomerController {
 
         CustomerDTO customer = new CustomerDTO(0, name, contact, address);
         try {
-            // 3. Save via BO
             if (customerBO.saveCustomer(customer)) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Saved Successfully!").show();
                 loadAllCustomers();
@@ -114,7 +116,6 @@ public class CustomerController {
 
         CustomerDTO customer = new CustomerDTO(Integer.parseInt(idText), name, contact, address);
         try {
-            // 4. Update via BO
             if (customerBO.updateCustomer(customer)) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Updated Successfully!").show();
                 loadAllCustomers();
@@ -139,7 +140,6 @@ public class CustomerController {
         if (!confirmed) return;
 
         try {
-            // 5. Delete via BO
             if (customerBO.deleteCustomer(Integer.parseInt(id))) {
                 new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
                 loadAllCustomers();

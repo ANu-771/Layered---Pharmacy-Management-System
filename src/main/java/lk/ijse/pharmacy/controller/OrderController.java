@@ -31,21 +31,28 @@ import java.util.stream.Collectors;
 
 public class OrderController {
 
-    @FXML private ComboBox<String> cmbCustomerId, cmbMedicineId, cmbPaymentMethod;
-    @FXML private TableView<CartTM> tblOrderCart;
-    @FXML private TableColumn<CartTM, String> colMedicineId, colDescription;
-    @FXML private TableColumn<CartTM, Integer> colQty;
-    @FXML private TableColumn<CartTM, Double> colUnitPrice, colLineTotal;
-    @FXML private TableColumn<CartTM, Button> colAction;
-    @FXML private Label lblCustomerName, lblOrderDate, lblQtyOnHand, lblUnitPrice, lblNetTotal, lblBalance;
-    @FXML private TextField txtDescription, txtOrderId, txtQty, txtCash;
+    @FXML
+    private ComboBox<String> cmbCustomerId, cmbMedicineId, cmbPaymentMethod;
+    @FXML
+    private TableView<CartTM> tblOrderCart;
+    @FXML
+    private TableColumn<CartTM, String> colMedicineId, colDescription;
+    @FXML
+    private TableColumn<CartTM, Integer> colQty;
+    @FXML
+    private TableColumn<CartTM, Double> colUnitPrice, colLineTotal;
+    @FXML
+    private TableColumn<CartTM, Button> colAction;
+    @FXML
+    private Label lblCustomerName, lblOrderDate, lblQtyOnHand, lblUnitPrice, lblNetTotal, lblBalance;
+    @FXML
+    private TextField txtDescription, txtOrderId, txtQty, txtCash;
 
     private ObservableList<CartTM> cartList = FXCollections.observableArrayList();
     private double netTotal = 0;
     private MedicineDTO selectedMedicine = null;
     private List<String> allMedicineNames = new ArrayList<>();
 
-    // BO Connections
     CustomerBO customerBO = (CustomerBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.CUSTOMER);
     MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
     PlaceOrderBO placeOrderBO = (PlaceOrderBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.PLACE_ORDER);
@@ -60,7 +67,6 @@ public class OrderController {
         setupAutoSuggestion();
         setupPaymentLogic();
 
-        // Auto-generate a visual Order ID (Optional, depends on your PlaceOrderBO implementation)
         txtOrderId.setText("Auto-Generated");
         txtOrderId.setEditable(false);
     }
@@ -202,7 +208,6 @@ public class OrderController {
         }
 
         try {
-            // 1. Prepare DTOs for the Transaction
             OrderDTO orderDTO = new OrderDTO(0, Integer.parseInt(customerId), 1, netTotal, new Date());
 
             List<OrderMedicineDTO> orderDetails = new ArrayList<>();
@@ -212,12 +217,10 @@ public class OrderController {
 
             PaymentDTO paymentDTO = new PaymentDTO(0, 0, cashAmount, new java.sql.Timestamp(System.currentTimeMillis()), paymentMethod);
 
-            // 2. Execute Transaction via BO
             boolean isPlaced = placeOrderBO.placeOrder(orderDTO, orderDetails, paymentDTO);
 
             if (isPlaced) {
-                // 3. GET THE GENERATED ID AND PRINT THE BILL
-                // We fetch the latest ID to ensure the report shows the current order
+
                 int latestOrderId = placeOrderBO.getLatestOrderId();
                 double balance = Double.parseDouble(lblBalance.getText());
 
@@ -225,7 +228,6 @@ public class OrderController {
 
                 new Alert(Alert.AlertType.INFORMATION, "Order Placed Successfully!").show();
 
-                // 4. Clear UI Fields
                 cartList.clear();
                 calculateNetTotal();
                 cmbMedicineId.getSelectionModel().clearSelection();
@@ -309,7 +311,6 @@ public class OrderController {
 
     private void printBill(int orderId, double balance) {
         try {
-            // 1. Load the Jasper Report file from your resources
             InputStream reportStream = getClass().getResourceAsStream("/report/bill.jrxml");
 
             if (reportStream == null) {
@@ -317,18 +318,15 @@ public class OrderController {
                 return;
             }
 
-            // 2. Set up the parameters (the same ones used in your JRXML file)
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("p_order_id", orderId);
             parameters.put("p_balance", balance);
 
-            // 3. Compile and Fill the report using the Database Connection
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
             Connection connection = DBConnection.getInstance().getConnection();
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
 
-            // 4. Show the report viewer
-            JasperViewer.viewReport(jasperPrint, false); // 'false' prevents closing the whole app when closing the report
+            JasperViewer.viewReport(jasperPrint, false);
 
         } catch (Exception e) {
             e.printStackTrace();

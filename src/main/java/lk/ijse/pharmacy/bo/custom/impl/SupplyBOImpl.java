@@ -15,7 +15,6 @@ import java.util.List;
 
 public class SupplyBOImpl implements SupplyBO {
 
-    // We need both SupplyDAO and MedicineDAO here
     SupplyDAO supplyDAO = (SupplyDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.SUPPLY);
     MedicineDAO medicineDAO = (MedicineDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.MEDICINE);
 
@@ -26,14 +25,12 @@ public class SupplyBOImpl implements SupplyBO {
 
     @Override
     public boolean saveSupply(int supplierId, String medName, LocalDate date, int qty, double unitCost, double totalCost) throws SQLException, ClassNotFoundException {
-        // First, find the Medicine ID based on the Name
         int medicineId = supplyDAO.getMedicineId(medName);
 
         if (medicineId == -1) {
-            return false; // Medicine not found
+            return false;
         }
 
-        // Save the supply record using the retrieved ID
         return supplyDAO.saveSupply(supplierId, medicineId, date, qty, unitCost, totalCost);
     }
 

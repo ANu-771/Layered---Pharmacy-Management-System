@@ -42,8 +42,8 @@ public class SupplyDAOImpl implements SupplyDAO {
 
         while (resultSet.next()) {
             list.add(new CustomEntity(
-                    resultSet.getString("date"), // <--- IF CustomEntity USES STRING
-                    // resultSet.getDate("date"), <--- UNCOMMENT THIS IF CustomEntity USES java.util.Date
+                    resultSet.getString("date"),
+                    // resultSet.getDate("date"),
                     resultSet.getInt("supplier_id"),
                     resultSet.getString("supplier_name"),
                     resultSet.getString("med_name"),

@@ -2,26 +2,21 @@ package lk.ijse.pharmacy.entity;
 
 public class CustomEntity {
 
-    // Shared Fields
     private String date;
     private double totalCost;
     private int qty;
 
-    // Fields for Supply Queries
     private int supplierId;
     private String supplierName;
     private String medName;
     private double unitCost;
 
-    // Fields for Report/Order Queries
     private int orderId;
     private String customerName;
 
-    // Default Constructor
     public CustomEntity() {
     }
 
-    // Constructor for SupplyDAO (Supply History)
     public CustomEntity(String date, int supplierId, String supplierName, String medName, int qty, double unitCost, double totalCost) {
         this.date = date;
         this.supplierId = supplierId;
@@ -32,7 +27,6 @@ public class CustomEntity {
         this.totalCost = totalCost;
     }
 
-    // Constructor for OrderDAO / Report Queries (Order Details)
     public CustomEntity(int orderId, String customerName, String date, double totalCost) {
         this.orderId = orderId;
         this.customerName = customerName;
@@ -40,7 +34,6 @@ public class CustomEntity {
         this.totalCost = totalCost;
     }
 
-    // --- Getters and Setters ---
 
     public String getDate() {
         return date;

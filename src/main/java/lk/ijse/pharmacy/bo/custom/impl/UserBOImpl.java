@@ -31,7 +31,10 @@ public class UserBOImpl implements UserBO {
 
     @Override
     public boolean saveUser(UserDTO dto) throws SQLException, ClassNotFoundException {
-        return userDAO.save(new User(dto.getUserId(), dto.getUsername(), dto.getEmail(), dto.getPassword(), dto.getRole()));
+        return userDAO.save(new User
+                (dto.getUserId(),
+                dto.getUsername(),
+                dto.getEmail(), dto.getPassword(), dto.getRole()));
     }
 
     @Override
@@ -48,7 +51,11 @@ public class UserBOImpl implements UserBO {
     public UserDTO searchUser(int id) throws SQLException, ClassNotFoundException {
         User entity = userDAO.search(id);
         if (entity != null) {
-            return new UserDTO(entity.getUserId(), entity.getUsername(), entity.getEmail(), entity.getPassword(), entity.getRole());
+            return new UserDTO(entity.getUserId(),
+                    entity.getUsername(),
+                    entity.getEmail(),
+                    entity.getPassword(),
+                    entity.getRole());
         }
         return null;
     }
@@ -67,7 +74,11 @@ public class UserBOImpl implements UserBO {
     public UserDTO getUserByEmail(String email) throws SQLException, ClassNotFoundException {
         User entity = userDAO.getUserByEmail(email);
         if (entity != null) {
-            return new UserDTO(entity.getUserId(), entity.getUsername(), entity.getEmail(), entity.getPassword(), entity.getRole());
+            return new UserDTO(entity.getUserId(),
+                    entity.getUsername(),
+                    entity.getEmail(),
+                    entity.getPassword(),
+                    entity.getRole());
         }
         return null;
     }

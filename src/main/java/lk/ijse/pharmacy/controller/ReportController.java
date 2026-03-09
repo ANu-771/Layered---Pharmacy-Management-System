@@ -54,7 +54,6 @@ public class ReportController {
     @FXML
     private TableColumn<ReportTM, Double> colTotal;
 
-    // 1. Get the BOs from BOFactory instead of using Models
     DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
     ReportBO reportBO = (ReportBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.REPORT);
 
@@ -75,7 +74,6 @@ public class ReportController {
         loadSummaryLabels();
         loadTableData();
 
-        // double click show bill from table
         tblReportDetails.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2 && !tblReportDetails.getSelectionModel().isEmpty()) {
                 ReportTM selectedItem = tblReportDetails.getSelectionModel().getSelectedItem();
@@ -90,7 +88,6 @@ public class ReportController {
 
     private void loadSummaryLabels() {
         try {
-            // 2. Call BO methods
             lblTotalSales.setText(String.format("Rs. %.2f", dashboardBO.getTodayIncome()));
             lblTotalOrders.setText(String.valueOf(reportBO.getTotalOrders()));
             lblItemsSold.setText(String.valueOf(reportBO.getItemsSold()));
@@ -156,7 +153,6 @@ public class ReportController {
 
     private void printBillFromReport(int orderId, double orderTotal) {
         try {
-            // 4. Call BO method
             double paidAmount = reportBO.getPaidAmount(orderId);
             double balance = paidAmount - orderTotal;
 

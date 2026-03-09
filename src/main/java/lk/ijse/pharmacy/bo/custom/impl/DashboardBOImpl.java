@@ -41,7 +41,6 @@ public class DashboardBOImpl implements DashboardBO {
         List<Medicine> entities = queryDAO.getExpiringMedicines();
         List<MedicineDTO> dtos = new ArrayList<>();
 
-        // Convert the Entity to DTO for the Controller
         for (Medicine e : entities) {
             dtos.add(new MedicineDTO(
                     e.getMedicineId(), e.getMedName(), e.getBrand(),

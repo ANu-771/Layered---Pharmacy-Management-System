@@ -21,27 +21,41 @@ import java.util.stream.Collectors;
 
 public class SupplyController {
 
-    @FXML private ComboBox<String> cmbSupplierId;
-    @FXML private TextField txtSupplierName;
-    @FXML private DatePicker dpSupplyDate;
-    @FXML private ComboBox<String> cmbMedicineId;
-    @FXML private TextField txtDescription;
-    @FXML private TextField txtBuyingPrice;
-    @FXML private TextField txtQty;
+    @FXML
+    private ComboBox<String> cmbSupplierId;
+    @FXML
+    private TextField txtSupplierName;
+    @FXML
+    private DatePicker dpSupplyDate;
+    @FXML
+    private ComboBox<String> cmbMedicineId;
+    @FXML
+    private TextField txtDescription;
+    @FXML
+    private TextField txtBuyingPrice;
+    @FXML
+    private TextField txtQty;
 
-    @FXML private TableView<SupplyRecordTM> tblSupplyRecord;
-    @FXML private TableColumn<SupplyRecordTM, String> colHistoryDate;
-    @FXML private TableColumn<SupplyRecordTM, Integer> colHistorySupId;
-    @FXML private TableColumn<SupplyRecordTM, String> colHistorySupName;
-    @FXML private TableColumn<SupplyRecordTM, String> colHistoryMedName;
-    @FXML private TableColumn<SupplyRecordTM, Integer> colHistoryQty;
-    @FXML private TableColumn<SupplyRecordTM, Double> colHistoryUnitCost;
-    @FXML private TableColumn<SupplyRecordTM, Double> colHistoryTotalCost;
+    @FXML
+    private TableView<SupplyRecordTM> tblSupplyRecord;
+    @FXML
+    private TableColumn<SupplyRecordTM, String> colHistoryDate;
+    @FXML
+    private TableColumn<SupplyRecordTM, Integer> colHistorySupId;
+    @FXML
+    private TableColumn<SupplyRecordTM, String> colHistorySupName;
+    @FXML
+    private TableColumn<SupplyRecordTM, String> colHistoryMedName;
+    @FXML
+    private TableColumn<SupplyRecordTM, Integer> colHistoryQty;
+    @FXML
+    private TableColumn<SupplyRecordTM, Double> colHistoryUnitCost;
+    @FXML
+    private TableColumn<SupplyRecordTM, Double> colHistoryTotalCost;
 
     private List<SupplierDTO> allSuppliers;
     private List<MedicineDTO> allMedicines;
 
-    // Call Business Objects (BO) from BOFactory
     SupplyBO supplyBO = (SupplyBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SUPPLY);
     SupplierBO supplierBO = (SupplierBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SUPPLIER);
     MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
@@ -86,7 +100,6 @@ public class SupplyController {
 
         String medName = txtDescription.getText().trim();
 
-        // CHECK IF MEDICINE EXISTS
         boolean isMedicineExist = false;
         if (allMedicines != null) {
             isMedicineExist = allMedicines.stream()

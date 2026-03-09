@@ -37,7 +37,6 @@ public class UserController {
     @FXML
     private TableColumn<UserDTO, String> colRole;
 
-    // 1. Get the BO from the Factory (No more DAOs or Models here!)
     UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.USER);
 
     @FXML
@@ -69,7 +68,6 @@ public class UserController {
 
     private void loadAllUsers() {
         try {
-            // 2. Call the BO method
             List<UserDTO> userList = userBO.getAllUsers();
             ObservableList<UserDTO> obList = FXCollections.observableArrayList(userList);
             tblUser.setItems(obList);
@@ -94,11 +92,9 @@ public class UserController {
             return;
         }
 
-        // Fixed: Pass the role into the DTO directly
         UserDTO user = new UserDTO(0, name, email, password, role);
 
         try {
-            // 3. Save via BO
             if (userBO.saveUser(user)) {
                 new Alert(Alert.AlertType.INFORMATION, "User Saved!").show();
                 btnClearOnAction(event);
@@ -139,7 +135,6 @@ public class UserController {
         UserDTO user = new UserDTO(id, name, email, password, role);
 
         try {
-            // 4. Update via BO
             if (userBO.updateUser(user)) {
                 new Alert(Alert.AlertType.INFORMATION, "User Updated!").show();
                 btnClearOnAction(event);
@@ -168,7 +163,6 @@ public class UserController {
         if (!confirmed) return;
 
         try {
-            // 5. Delete via BO (Convert String ID to int)
             if (userBO.deleteUser(Integer.parseInt(id))) {
                 new Alert(Alert.AlertType.INFORMATION, "User Deleted!").show();
                 btnClearOnAction(event);
@@ -191,7 +185,6 @@ public class UserController {
         }
 
         try {
-            // 6. Search via BO
             UserDTO user = userBO.searchUser(Integer.parseInt(id));
             if (user != null) {
                 populateFields(user);

@@ -14,29 +14,27 @@ import java.util.List;
 
 public class ReportBOImpl implements ReportBO {
 
-    // Load the 3 DAOs we modified
     OrderDAO orderDAO = (OrderDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.ORDER);
     OrderMedicineDAO orderMedicineDAO = (OrderMedicineDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.ORDER_DETAIL);
     PaymentDAO paymentDAO = (PaymentDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.PAYMENT);
 
     @Override
     public int getTotalOrders() throws SQLException, ClassNotFoundException {
-        return orderDAO.getTotalOrders(); // Gets it from OrderDAO
+        return orderDAO.getTotalOrders();
     }
 
     @Override
     public int getItemsSold() throws SQLException, ClassNotFoundException {
-        return orderMedicineDAO.getItemsSold(); // Gets it from OrderMedicineDAO
+        return orderMedicineDAO.getItemsSold();
     }
 
     @Override
     public double getPaidAmount(int orderId) throws SQLException, ClassNotFoundException {
-        return paymentDAO.getPaidAmount(orderId); // Gets it from PaymentDAO
+        return paymentDAO.getPaidAmount(orderId);
     }
 
     @Override
     public List<ReportTM> getAllOrderDetails() throws SQLException, ClassNotFoundException {
-        // Get Entities from DAO and convert to TMs for the Controller
         List<CustomEntity> entities = orderDAO.getAllOrderDetails();
         List<ReportTM> tmList = new ArrayList<>();
 

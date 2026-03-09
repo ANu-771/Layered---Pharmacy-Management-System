@@ -16,10 +16,12 @@ import lk.ijse.pharmacy.bo.custom.UserBO;
 
 public class LoginController {
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
+    @FXML
+    private TextField usernameField;
 
-    // BO Connection
+    @FXML
+    private PasswordField passwordField;
+
     UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.USER);
 
     @FXML
@@ -37,7 +39,6 @@ public class LoginController {
         if (password.isEmpty()) { passwordField.setStyle(errorStyle); passwordField.requestFocus(); return; }
 
         try {
-            // Check username using BO
             boolean isUserFound = userBO.isUsernameExists(username);
 
             if (!isUserFound) {

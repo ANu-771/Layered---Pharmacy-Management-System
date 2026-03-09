@@ -44,7 +44,6 @@ public class QueryDAOImpl implements QueryDAO {
     @Override
     public Map<String, Double> getIncomeTrends() throws SQLException, ClassNotFoundException {
         Map<String, Double> trends = new HashMap<>();
-        // Gets the income grouped by date for the last 7 days
         String sql = "SELECT order_date, SUM(total) as daily_total FROM orders GROUP BY order_date ORDER BY order_date DESC LIMIT 7";
         ResultSet rs = CrudUtil.execute(sql);
 
@@ -57,7 +56,6 @@ public class QueryDAOImpl implements QueryDAO {
     @Override
     public List<Medicine> getExpiringMedicines() throws SQLException, ClassNotFoundException {
         List<Medicine> list = new ArrayList<>();
-        // Gets medicines expiring within the next 30 days
         String sql = "SELECT * FROM medicine WHERE exp_date <= DATE_ADD(CURRENT_DATE, INTERVAL 30 DAY) ORDER BY exp_date ASC";
         ResultSet rs = CrudUtil.execute(sql);
 
@@ -94,7 +92,6 @@ public class QueryDAOImpl implements QueryDAO {
         String sql = "SELECT o.order_id, c.name, o.order_date, o.total FROM orders o JOIN customer c ON o.customer_id = c.customer_id ORDER BY o.order_date DESC, o.order_id DESC";
         ResultSet rs = CrudUtil.execute(sql);
         while (rs.next()) {
-            // Use CustomEntity to hold joined data
             CustomEntity entity = new CustomEntity();
             entity.setOrderId(rs.getInt("order_id"));
             entity.setCustomerName(rs.getString("name"));

@@ -23,18 +23,24 @@ import java.util.stream.Collectors;
 
 public class MedicineController {
 
-    @FXML private Button btnClear, btnDelete, btnSave, btnUpdate;
-    @FXML private TableColumn<MedicineDTO, String> colBrand, colExpDate, colName;
-    @FXML private TableColumn<MedicineDTO, Integer> colId, colQty;
-    @FXML private TableColumn<MedicineDTO, Double> colPrice;
-    @FXML private DatePicker dpExpDate;
-    @FXML private TableView<MedicineDTO> tblMedicine;
-    @FXML private TextField txtBrand, txtId, txtName, txtPrice, txtQty;
+    @FXML
+    private Button btnClear, btnDelete, btnSave, btnUpdate;
+    @FXML
+    private TableColumn<MedicineDTO, String> colBrand, colExpDate, colName;
+    @FXML
+    private TableColumn<MedicineDTO, Integer> colId, colQty;
+    @FXML
+    private TableColumn<MedicineDTO, Double> colPrice;
+    @FXML
+    private DatePicker dpExpDate;
+    @FXML
+    private TableView<MedicineDTO> tblMedicine;
+    @FXML
+    private TextField txtBrand, txtId, txtName, txtPrice, txtQty;
 
     private ObservableList<MedicineDTO> medicineList = FXCollections.observableArrayList();
     private List<String> allMedicineNames = new ArrayList<>();
 
-    // ALWAYS USE BO! NOT DAO!
     MedicineBO medicineBO = (MedicineBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.MEDICINE);
 
     @FXML
@@ -71,7 +77,6 @@ public class MedicineController {
         int qty = Integer.parseInt(qtyText);
         Date expDate = Date.from(localExpDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        // FIXED: Added '0' for the auto-increment ID
         MedicineDTO medicine = new MedicineDTO(0, name, brand, qty, price, expDate);
 
         try {

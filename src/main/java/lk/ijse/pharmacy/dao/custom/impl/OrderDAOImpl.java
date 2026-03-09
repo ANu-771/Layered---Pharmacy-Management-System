@@ -21,12 +21,12 @@ public class OrderDAOImpl implements OrderDAO {
 
     @Override
     public boolean update(Order entity) throws SQLException, ClassNotFoundException {
-        return false; // Orders usually aren't updated
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException, ClassNotFoundException {
-        return false; // Orders usually aren't deleted
+        return false;
     }
 
     @Override
@@ -52,7 +52,6 @@ public class OrderDAOImpl implements OrderDAO {
 
     @Override
     public int getLatestOrderId() throws SQLException, ClassNotFoundException {
-        // This SQL returns the most recently generated auto-increment ID in the current session
         ResultSet rs = CrudUtil.execute("SELECT LAST_INSERT_ID()");
         if (rs.next()) {
             return rs.getInt(1);
@@ -73,7 +72,6 @@ public class OrderDAOImpl implements OrderDAO {
         String sql = "SELECT o.order_id, c.name, o.order_date, o.total FROM orders o JOIN customer c ON o.customer_id = c.customer_id ORDER BY o.order_date DESC, o.order_id DESC";
         ResultSet rs = CrudUtil.execute(sql);
         while (rs.next()) {
-            // Assuming CustomEntity has these fields
             CustomEntity entity = new CustomEntity();
             entity.setOrderId(rs.getInt("order_id"));
             entity.setCustomerName(rs.getString("name"));

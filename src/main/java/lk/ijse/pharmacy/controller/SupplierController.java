@@ -15,15 +15,19 @@ import java.sql.SQLException;
 
 public class SupplierController {
 
-    @FXML private TextField txtId, txtName, txtContact, txtEmail;
-    @FXML private Button btnSave, btnDelete, btnUpdate, btnReset;
-    @FXML private TableView<SupplierDTO> tblSupplier;
-    @FXML private TableColumn<SupplierDTO, Integer> colId;
-    @FXML private TableColumn<SupplierDTO, String> colName, colEmail, colContact;
+    @FXML
+    private TextField txtId, txtName, txtContact, txtEmail;
+    @FXML
+    private Button btnSave, btnDelete, btnUpdate, btnReset;
+    @FXML
+    private TableView<SupplierDTO> tblSupplier;
+    @FXML
+    private TableColumn<SupplierDTO, Integer> colId;
+    @FXML
+    private TableColumn<SupplierDTO, String> colName, colEmail, colContact;
 
     ObservableList<SupplierDTO> supplierList = FXCollections.observableArrayList();
 
-    // 1. BO Connection
     SupplierBO supplierBO = (SupplierBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SUPPLIER);
 
     @FXML
@@ -139,7 +143,7 @@ public class SupplierController {
     private void loadAllSuppliers() {
         try {
             supplierList.clear();
-            supplierList.setAll(supplierBO.getAllSuppliers()); // BO Call
+            supplierList.setAll(supplierBO.getAllSuppliers());
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }

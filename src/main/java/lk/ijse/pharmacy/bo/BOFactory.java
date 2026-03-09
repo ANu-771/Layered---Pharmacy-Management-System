@@ -6,7 +6,6 @@ public class BOFactory {
 
     private static BOFactory boFactory;
 
-    // Private constructor to prevent object creation from outside
     private BOFactory() {
     }
 
@@ -15,12 +14,10 @@ public class BOFactory {
         return boFactory == null ? boFactory = new BOFactory() : boFactory;
     }
 
-    // Enum to hold all our BO types
     public enum BOTypes {
         CUSTOMER, MEDICINE, SUPPLIER, USER, SUPPLY, PLACE_ORDER, DASHBOARD, REPORT
     }
 
-    // The Factory method
     public SuperBO getBO(BOTypes types) {
         switch (types) {
             case CUSTOMER:
@@ -38,7 +35,7 @@ public class BOFactory {
             case DASHBOARD:
                 return new DashboardBOImpl();
             case REPORT:
-                return new ReportBOImpl(); // Added ReportBO for your ReportController
+                return new ReportBOImpl();
             default:
                 return null;
         }

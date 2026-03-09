@@ -12,12 +12,11 @@ import java.util.List;
 
 public class CustomerBOImpl implements CustomerBO {
 
-    // Get the DAO from the Factory (we will build the Factory in Step 3)
+    // Get the DAO from the Factory
     CustomerDAO customerDAO = (CustomerDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.CUSTOMER);
 
     @Override
     public boolean saveCustomer(CustomerDTO dto) throws SQLException, ClassNotFoundException {
-        // Convert DTO to Entity and pass to DAO
         return customerDAO.save(new Customer(dto.getCustomerId(), dto.getName(), dto.getContact(), dto.getAddress()));
     }
 

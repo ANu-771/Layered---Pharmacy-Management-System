@@ -17,13 +17,17 @@ import java.util.TreeMap;
 
 public class DashboardController {
 
-    @FXML private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
-    @FXML private AreaChart<String, Number> chartSales;
-    @FXML private TableView<MedicineDTO> tblExpiring;
-    @FXML private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
-    @FXML private TableColumn<MedicineDTO, Integer> colExpQty;
+    @FXML
+    private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
+    @FXML
+    private AreaChart<String, Number> chartSales;
+    @FXML
+    private TableView<MedicineDTO> tblExpiring;
+    @FXML
+    private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
+    @FXML
+    private TableColumn<MedicineDTO, Integer> colExpQty;
 
-    // Correctly using BO from Factory
     DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
 
     @FXML
@@ -35,7 +39,6 @@ public class DashboardController {
 
     private void loadDashboardCounts() {
         try {
-            // FIXED: Changed dashboardModel to dashboardBO
             lblTotalMedicines.setText(String.valueOf(dashboardBO.getTotalMedicineCount()));
             lblActiveCustomers.setText(String.valueOf(dashboardBO.getActiveCustomerCount()));
             lblTodayIncome.setText(String.format("Rs. %.2f", dashboardBO.getTodayIncome()));
@@ -48,7 +51,6 @@ public class DashboardController {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             series.setName("Daily Sales");
 
-            // FIXED: Changed dashboardModel to dashboardBO
             Map<String, Double> trends = new TreeMap<>(dashboardBO.getIncomeTrends());
             for (Map.Entry<String, Double> entry : trends.entrySet()) {
                 series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
@@ -63,7 +65,6 @@ public class DashboardController {
         colExpDate.setCellValueFactory(new PropertyValueFactory<>("expDate"));
         colExpQty.setCellValueFactory(new PropertyValueFactory<>("qtyInStock"));
         try {
-            // FIXED: Changed dashboardModel to dashboardBO
             tblExpiring.setItems(FXCollections.observableArrayList(dashboardBO.getExpiringMedicines()));
         } catch (Exception e) { e.printStackTrace(); }
     }

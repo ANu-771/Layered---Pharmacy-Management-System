@@ -2,12 +2,8 @@ package lk.ijse.pharmacy.dao.custom.impl;
 
 import lk.ijse.pharmacy.dao.CrudUtil;
 import lk.ijse.pharmacy.dao.custom.MedicineDAO;
-import lk.ijse.pharmacy.dbconnection.DBConnection;
-import lk.ijse.pharmacy.dto.MedicineDTO;
 import lk.ijse.pharmacy.entity.Medicine;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +18,7 @@ public class MedicineDAOImpl implements MedicineDAO {
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM medicine");
         while (resultSet.next()) {
             list.add(new Medicine(
-                    resultSet.getInt("medicine_id"), // Use getInt
+                    resultSet.getInt("medicine_id"),
                     resultSet.getString("med_name"),
                     resultSet.getString("brand"),
                     resultSet.getInt("qty_in_stock"),

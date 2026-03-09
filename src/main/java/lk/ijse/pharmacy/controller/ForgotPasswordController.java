@@ -25,7 +25,6 @@ public class ForgotPasswordController {
     @FXML
     private Button btnCancel;
 
-    // Use UserBO from BOFactory instead of DAO/Model
     UserBO userBO = (UserBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.USER);
 
     @FXML
@@ -45,7 +44,6 @@ public class ForgotPasswordController {
         }
 
         try {
-            // Call UserBO
             UserDTO user = userBO.getUserByEmail(email);
 
             if (user == null) {
