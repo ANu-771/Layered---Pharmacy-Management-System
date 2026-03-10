@@ -1,7 +1,7 @@
 package lk.ijse.pharmacy.dao.custom;
 
 import lk.ijse.pharmacy.dao.CrudDAO;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 import lk.ijse.pharmacy.entity.Order;
 
 import java.sql.SQLException;
@@ -13,5 +13,5 @@ public interface OrderDAO extends CrudDAO<Order> {
 
     int getTotalOrders() throws SQLException, ClassNotFoundException;
 
-    List<CustomEntity> getAllOrderDetails() throws SQLException, ClassNotFoundException;
+    List<CustomDTO> getAllOrderDetails() throws SQLException, ClassNotFoundException;
 }

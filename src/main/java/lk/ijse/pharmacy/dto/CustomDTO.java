@@ -1,6 +1,6 @@
-package lk.ijse.pharmacy.entity;
+package lk.ijse.pharmacy.dto;
 
-public class CustomEntity {
+public class CustomDTO {
 
     private String date;
     private double totalCost;
@@ -14,10 +14,10 @@ public class CustomEntity {
     private int orderId;
     private String customerName;
 
-    public CustomEntity() {
+    public CustomDTO() {
     }
 
-    public CustomEntity(String date, int supplierId, String supplierName, String medName, int qty, double unitCost, double totalCost) {
+    public CustomDTO(String date, int supplierId, String supplierName, String medName, int qty, double unitCost, double totalCost) {
         this.date = date;
         this.supplierId = supplierId;
         this.supplierName = supplierName;
@@ -27,7 +27,7 @@ public class CustomEntity {
         this.totalCost = totalCost;
     }
 
-    public CustomEntity(int orderId, String customerName, String date, double totalCost) {
+    public CustomDTO(int orderId, String customerName, String date, double totalCost) {
         this.orderId = orderId;
         this.customerName = customerName;
         this.date = date;

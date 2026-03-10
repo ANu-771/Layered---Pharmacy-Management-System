@@ -6,7 +6,7 @@ import lk.ijse.pharmacy.dao.custom.OrderDAO;
 import lk.ijse.pharmacy.dao.custom.OrderMedicineDAO;
 import lk.ijse.pharmacy.dao.custom.PaymentDAO;
 import lk.ijse.pharmacy.dto.tm.ReportTM;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,10 +35,10 @@ public class ReportBOImpl implements ReportBO {
 
     @Override
     public List<ReportTM> getAllOrderDetails() throws SQLException, ClassNotFoundException {
-        List<CustomEntity> entities = orderDAO.getAllOrderDetails();
+        List<CustomDTO> entities = orderDAO.getAllOrderDetails();
         List<ReportTM> tmList = new ArrayList<>();
 
-        for (CustomEntity e : entities) {
+        for (CustomDTO e : entities) {
             tmList.add(new ReportTM(
                     String.valueOf(e.getOrderId()),
                     e.getCustomerName(),

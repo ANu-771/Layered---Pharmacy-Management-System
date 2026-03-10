@@ -2,7 +2,7 @@ package lk.ijse.pharmacy.dao.custom.impl;
 
 import lk.ijse.pharmacy.dao.CrudUtil;
 import lk.ijse.pharmacy.dao.custom.OrderDAO;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 import lk.ijse.pharmacy.entity.Order;
 
 import java.sql.ResultSet;
@@ -67,12 +67,12 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public List<CustomEntity> getAllOrderDetails() throws SQLException, ClassNotFoundException {
-        List<CustomEntity> list = new ArrayList<>();
+    public List<CustomDTO> getAllOrderDetails() throws SQLException, ClassNotFoundException {
+        List<CustomDTO> list = new ArrayList<>();
         String sql = "SELECT o.order_id, c.name, o.order_date, o.total FROM orders o JOIN customer c ON o.customer_id = c.customer_id ORDER BY o.order_date DESC, o.order_id DESC";
         ResultSet rs = CrudUtil.execute(sql);
         while (rs.next()) {
-            CustomEntity entity = new CustomEntity();
+            CustomDTO entity = new CustomDTO();
             entity.setOrderId(rs.getInt("order_id"));
             entity.setCustomerName(rs.getString("name"));
             entity.setDate(rs.getString("order_date"));

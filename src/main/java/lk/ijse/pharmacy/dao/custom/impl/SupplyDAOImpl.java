@@ -2,7 +2,7 @@ package lk.ijse.pharmacy.dao.custom.impl;
 
 import lk.ijse.pharmacy.dao.CrudUtil;
 import lk.ijse.pharmacy.dao.custom.SupplyDAO;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,8 +30,8 @@ public class SupplyDAOImpl implements SupplyDAO {
     }
 
     @Override
-    public List<CustomEntity> getAllSupplies() throws SQLException, ClassNotFoundException {
-        List<CustomEntity> list = new ArrayList<>();
+    public List<CustomDTO> getAllSupplies() throws SQLException, ClassNotFoundException {
+        List<CustomDTO> list = new ArrayList<>();
         String sql = "SELECT sm.date, sm.supplier_id, s.supplier_name, m.med_name, sm.qty, sm.unit_cost, sm.total_cost " +
                 "FROM supplier_medicine sm " +
                 "JOIN supplier s ON sm.supplier_id = s.supplier_id " +
@@ -41,7 +41,7 @@ public class SupplyDAOImpl implements SupplyDAO {
         ResultSet resultSet = CrudUtil.execute(sql);
 
         while (resultSet.next()) {
-            list.add(new CustomEntity(
+            list.add(new CustomDTO(
                     resultSet.getString("date"),
                     // resultSet.getDate("date"),
                     resultSet.getInt("supplier_id"),

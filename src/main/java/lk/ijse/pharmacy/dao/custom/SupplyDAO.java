@@ -1,7 +1,7 @@
 package lk.ijse.pharmacy.dao.custom;
 
 import lk.ijse.pharmacy.dao.SuperDAO;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -13,6 +13,6 @@ public interface SupplyDAO extends SuperDAO {
 
     boolean saveSupply(int supplierId, int medicineId, LocalDate date, int qty, double unitCost, double totalCost) throws SQLException, ClassNotFoundException;
 
-    List<CustomEntity> getAllSupplies() throws SQLException, ClassNotFoundException;
+    List<CustomDTO> getAllSupplies() throws SQLException, ClassNotFoundException;
 
 }

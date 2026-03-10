@@ -17,21 +17,35 @@ import java.util.TreeMap;
 
 public class DashboardController {
 
-    @FXML
-    private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
-    @FXML
-    private AreaChart<String, Number> chartSales;
-    @FXML
-    private TableView<MedicineDTO> tblExpiring;
-    @FXML
-    private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
-    @FXML
-    private TableColumn<MedicineDTO, Integer> colExpQty;
+    // 1. Create a static instance of this controller
+    private static DashboardController instance;
+
+    @FXML private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
+    @FXML private AreaChart<String, Number> chartSales;
+    @FXML private TableView<MedicineDTO> tblExpiring;
+    @FXML private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
+    @FXML private TableColumn<MedicineDTO, Integer> colExpQty;
 
     DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
 
+    // 2. Assign the instance when the controller is loaded
+    public DashboardController() {
+        instance = this;
+    }
+
+    // 3. Provide a way for other controllers to get this instance
+    public static DashboardController getInstance() {
+        return instance;
+    }
+
     @FXML
     public void initialize() {
+        chartSales.setAnimated(false);
+        refreshDashboard(); // Load data initially
+    }
+
+    // 4. Create a public method to refresh the data
+    public void refreshDashboard() {
         loadDashboardCounts();
         loadChart();
         loadExpiringMedicines();
@@ -47,11 +61,12 @@ public class DashboardController {
 
     private void loadChart() {
         try {
+            Map<String, Double> trends = new TreeMap<>(dashboardBO.getIncomeTrends());
             chartSales.getData().clear();
+
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             series.setName("Daily Sales");
 
-            Map<String, Double> trends = new TreeMap<>(dashboardBO.getIncomeTrends());
             for (Map.Entry<String, Double> entry : trends.entrySet()) {
                 series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
             }
@@ -64,6 +79,7 @@ public class DashboardController {
         colExpName.setCellValueFactory(new PropertyValueFactory<>("medName"));
         colExpDate.setCellValueFactory(new PropertyValueFactory<>("expDate"));
         colExpQty.setCellValueFactory(new PropertyValueFactory<>("qtyInStock"));
+
         try {
             tblExpiring.setItems(FXCollections.observableArrayList(dashboardBO.getExpiringMedicines()));
         } catch (Exception e) { e.printStackTrace(); }

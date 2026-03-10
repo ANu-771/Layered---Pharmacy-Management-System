@@ -1,7 +1,7 @@
 package lk.ijse.pharmacy.dao.custom;
 
 import lk.ijse.pharmacy.dao.SuperDAO;
-import lk.ijse.pharmacy.entity.CustomEntity;
+import lk.ijse.pharmacy.dto.CustomDTO;
 import lk.ijse.pharmacy.entity.Medicine;
 
 import java.sql.SQLException;
@@ -24,7 +24,7 @@ public interface QueryDAO extends SuperDAO {
 
     int getItemsSold() throws SQLException, ClassNotFoundException;
 
-    List<CustomEntity> getAllOrderDetails() throws SQLException, ClassNotFoundException;
+    List<CustomDTO> getAllOrderDetails() throws SQLException, ClassNotFoundException;
 
     double getPaidAmount(int orderId) throws SQLException, ClassNotFoundException;
 

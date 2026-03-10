@@ -5,8 +5,7 @@ import lk.ijse.pharmacy.dao.DAOFactory;
 import lk.ijse.pharmacy.dao.custom.MedicineDAO;
 import lk.ijse.pharmacy.dao.custom.SupplyDAO;
 import lk.ijse.pharmacy.dto.tm.SupplyRecordTM;
-import lk.ijse.pharmacy.entity.CustomEntity;
-import lk.ijse.pharmacy.entity.Medicine;
+import lk.ijse.pharmacy.dto.CustomDTO;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -36,10 +35,10 @@ public class SupplyBOImpl implements SupplyBO {
 
     @Override
     public List<SupplyRecordTM> getAllSupplies() throws SQLException, ClassNotFoundException {
-        List<CustomEntity> entities = supplyDAO.getAllSupplies();
+        List<CustomDTO> entities = supplyDAO.getAllSupplies();
         List<SupplyRecordTM> tmList = new ArrayList<>();
 
-        for (CustomEntity entity : entities) {
+        for (CustomDTO entity : entities) {
             tmList.add(new SupplyRecordTM(
                     entity.getDate(),
                     entity.getSupplierId(),
