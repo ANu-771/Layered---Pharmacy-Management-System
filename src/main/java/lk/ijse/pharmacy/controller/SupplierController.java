@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import lk.ijse.pharmacy.bo.BOFactory;
 import lk.ijse.pharmacy.bo.custom.SupplierBO;
 import lk.ijse.pharmacy.dto.SupplierDTO;
+
 import java.sql.SQLException;
 
 public class SupplierController {
@@ -48,7 +49,10 @@ public class SupplierController {
     private void handlePressEnter(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             String id = txtId.getText() == null ? "" : txtId.getText().trim();
-            if (!id.matches("^\\d+$")) { new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show(); return; }
+            if (!id.matches("^\\d+$")) {
+                new Alert(Alert.AlertType.WARNING, "Please enter a valid ID!").show();
+                return;
+            }
             try {
                 SupplierDTO supplierDTO = supplierBO.searchSupplier(Integer.parseInt(id)); // BO Call
                 if (supplierDTO == null) {
@@ -152,11 +156,16 @@ public class SupplierController {
     private boolean validateSupplierInput(String name, String contact, String email) {
         if (!name.matches("[A-Za-z .'-]{3,}")) return false;
         if (!contact.matches("^\\d{10}$")) return false;
-        if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,10}$")) return false;
+        if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,10}$"))
+            return false;
         return true;
     }
 
-    @FXML void btnResetOnAction(ActionEvent event) { loadAllSuppliers(); clearFields(); }
+    @FXML
+    void btnResetOnAction(ActionEvent event) {
+        loadAllSuppliers();
+        clearFields();
+    }
 
     private void populateFields(SupplierDTO supplierDTO) {
         txtId.setText(String.valueOf(supplierDTO.getSupplierId()));
@@ -165,5 +174,10 @@ public class SupplierController {
         txtEmail.setText(supplierDTO.getEmail());
     }
 
-    private void clearFields() { txtId.clear(); txtName.clear(); txtContact.clear(); txtEmail.clear(); }
+    private void clearFields() {
+        txtId.clear();
+        txtName.clear();
+        txtContact.clear();
+        txtEmail.clear();
+    }
 }

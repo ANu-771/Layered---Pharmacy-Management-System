@@ -87,7 +87,9 @@ public class OrderController {
             ObservableList<String> ids = FXCollections.observableArrayList();
             for (CustomerDTO c : allCustomers) ids.add(String.valueOf(c.getCustomerId()));
             cmbCustomerId.setItems(ids);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadMedicineIds() {
@@ -96,17 +98,24 @@ public class OrderController {
             ObservableList<String> ids = FXCollections.observableArrayList();
             for (MedicineDTO m : allMedicines) ids.add(String.valueOf(m.getMedicineId()));
             cmbMedicineId.setItems(ids);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     public void cmbCustomerOnAction(ActionEvent actionEvent) {
         String id = cmbCustomerId.getValue();
-        if (id == null) { lblCustomerName.setText(""); return; }
+        if (id == null) {
+            lblCustomerName.setText("");
+            return;
+        }
         try {
             CustomerDTO customer = customerBO.searchCustomer(Integer.parseInt(id));
             if (customer != null) lblCustomerName.setText(customer.getName());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -122,7 +131,9 @@ public class OrderController {
                 lblQtyOnHand.setText(String.valueOf(medicine.getQtyInStock()));
                 txtQty.requestFocus();
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -136,13 +147,23 @@ public class OrderController {
         try {
             java.time.LocalDate expDate = new java.sql.Date(selectedMedicine.getExpDate().getTime()).toLocalDate();
             java.time.LocalDate today = java.time.LocalDate.now();
-            if (expDate.isBefore(today)) { new Alert(Alert.AlertType.ERROR, "Cannot Sell! EXPIRED on: " + expDate).show(); return; }
-            if (expDate.isBefore(today.plusDays(21))) { new Alert(Alert.AlertType.WARNING, "Warning! Expires soon (" + expDate + "). Cannot add.").show(); return; }
-        } catch (Exception e) { e.printStackTrace(); return; }
+            if (expDate.isBefore(today)) {
+                new Alert(Alert.AlertType.ERROR, "Cannot Sell! EXPIRED on: " + expDate).show();
+                return;
+            }
+            if (expDate.isBefore(today.plusDays(21))) {
+                new Alert(Alert.AlertType.WARNING, "Warning! Expires soon (" + expDate + "). Cannot add.").show();
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         String qtyText = txtQty.getText().trim();
         if (qtyText.isEmpty() || !qtyText.matches("\\d+") || Integer.parseInt(qtyText) <= 0) {
-            new Alert(Alert.AlertType.ERROR, "Invalid Quantity!").show(); return;
+            new Alert(Alert.AlertType.ERROR, "Invalid Quantity!").show();
+            return;
         }
 
         try {
@@ -151,14 +172,20 @@ public class OrderController {
             int qtyOnHand = Integer.parseInt(lblQtyOnHand.getText());
             int qty = Integer.parseInt(qtyText);
 
-            if (qty > qtyOnHand) { new Alert(Alert.AlertType.ERROR, "Out of Stock! Only " + qtyOnHand + " left.").show(); return; }
+            if (qty > qtyOnHand) {
+                new Alert(Alert.AlertType.ERROR, "Out of Stock! Only " + qtyOnHand + " left.").show();
+                return;
+            }
 
             double total = qty * unitPrice;
             CartTM existingItem = cartList.stream().filter(tm -> tm.getMedicineId().equals(medId)).findFirst().orElse(null);
 
             if (existingItem != null) {
                 int newQty = existingItem.getQty() + qty;
-                if (newQty > qtyOnHand) { new Alert(Alert.AlertType.ERROR, "Not enough stock!").show(); return; }
+                if (newQty > qtyOnHand) {
+                    new Alert(Alert.AlertType.ERROR, "Not enough stock!").show();
+                    return;
+                }
                 existingItem.setQty(newQty);
                 existingItem.setTotal(newQty * unitPrice);
                 tblOrderCart.refresh();
@@ -166,12 +193,17 @@ public class OrderController {
                 Button btnRemove = new Button("Remove");
                 btnRemove.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
                 CartTM newTm = new CartTM(medId, desc, qty, unitPrice, total, btnRemove);
-                btnRemove.setOnAction((e) -> { cartList.remove(newTm); calculateNetTotal(); });
+                btnRemove.setOnAction((e) -> {
+                    cartList.remove(newTm);
+                    calculateNetTotal();
+                });
                 cartList.add(newTm);
             }
             calculateNetTotal();
             txtQty.clear();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void calculateNetTotal() {
@@ -259,8 +291,12 @@ public class OrderController {
                 lblUnitPrice.setText(String.valueOf(medicine.getUnitPrice()));
                 lblQtyOnHand.setText(String.valueOf(medicine.getQtyInStock()));
                 txtQty.requestFocus();
-            } else { new Alert(Alert.AlertType.WARNING, "Medicine not found!").show(); }
-        } catch (Exception e) { e.printStackTrace(); }
+            } else {
+                new Alert(Alert.AlertType.WARNING, "Medicine not found!").show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupPaymentLogic() {
@@ -269,44 +305,68 @@ public class OrderController {
         txtCash.textProperty().addListener((obs, oldV, newV) -> calculateBalance());
         cmbPaymentMethod.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if ("Card".equals(newV)) {
-                txtCash.setDisable(true); lblBalance.setDisable(true); txtCash.clear(); lblBalance.setText("0.00");
+                txtCash.setDisable(true);
+                lblBalance.setDisable(true);
+                txtCash.clear();
+                lblBalance.setText("0.00");
             } else {
-                txtCash.setDisable(false); lblBalance.setDisable(false); txtCash.requestFocus();
+                txtCash.setDisable(false);
+                lblBalance.setDisable(false);
+                txtCash.requestFocus();
             }
         });
     }
 
     private void calculateBalance() {
         try {
-            if (txtCash.getText().isEmpty()) { lblBalance.setText("0.00"); return; }
+            if (txtCash.getText().isEmpty()) {
+                lblBalance.setText("0.00");
+                return;
+            }
             double balance = Double.parseDouble(txtCash.getText()) - netTotal;
             lblBalance.setText(String.format("%.2f", balance));
             lblBalance.setStyle(balance < 0 ? "-fx-text-fill: red;" : "-fx-text-fill: #22c55e;");
-        } catch (NumberFormatException e) { lblBalance.setText("Invalid"); }
+        } catch (NumberFormatException e) {
+            lblBalance.setText("Invalid");
+        }
     }
 
     private void loadMedicineNames() {
         try {
             allMedicineNames.clear();
             for (MedicineDTO m : medicineBO.getAllMedicines()) allMedicineNames.add(m.getMedName());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupAutoSuggestion() {
         ContextMenu suggestionsMenu = new ContextMenu();
         txtDescription.textProperty().addListener((obs, oldV, newV) -> {
-            if (newV == null || newV.isEmpty()) { suggestionsMenu.hide(); return; }
+            if (newV == null || newV.isEmpty()) {
+                suggestionsMenu.hide();
+                return;
+            }
             List<String> matches = allMedicineNames.stream().filter(n -> n.toLowerCase().contains(newV.toLowerCase())).collect(Collectors.toList());
-            if (matches.isEmpty()) { suggestionsMenu.hide(); return; }
+            if (matches.isEmpty()) {
+                suggestionsMenu.hide();
+                return;
+            }
             suggestionsMenu.getItems().clear();
             for (String match : matches) {
                 MenuItem item = new MenuItem(match);
-                item.setOnAction(e -> { txtDescription.setText(match); suggestionsMenu.hide(); txtSearchMedicineOnAction(null); });
+                item.setOnAction(e -> {
+                    txtDescription.setText(match);
+                    suggestionsMenu.hide();
+                    txtSearchMedicineOnAction(null);
+                });
                 suggestionsMenu.getItems().add(item);
             }
             if (!suggestionsMenu.isShowing()) suggestionsMenu.show(txtDescription, Side.BOTTOM, 0, 0);
         });
-        txtDescription.focusedProperty().addListener((obs, oldV, newV) -> { if (!newV) suggestionsMenu.hide(); });
+        txtDescription.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) suggestionsMenu.hide();
+        });
     }
 
     private void printBill(int orderId, double balance) {

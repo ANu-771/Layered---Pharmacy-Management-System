@@ -54,8 +54,12 @@ public class MedicineController {
             if (newVal != null) populateFields(newVal);
         });
 
-        txtPrice.textProperty().addListener((obs, oldV, newV) -> { if (!newV.matches("\\d*(\\.\\d*)?")) txtPrice.setText(oldV); });
-        txtQty.textProperty().addListener((obs, oldV, newV) -> { if (!newV.matches("\\d*")) txtQty.setText(oldV); });
+        txtPrice.textProperty().addListener((obs, oldV, newV) -> {
+            if (!newV.matches("\\d*(\\.\\d*)?")) txtPrice.setText(oldV);
+        });
+        txtQty.textProperty().addListener((obs, oldV, newV) -> {
+            if (!newV.matches("\\d*")) txtQty.setText(oldV);
+        });
     }
 
     @FXML
@@ -156,7 +160,10 @@ public class MedicineController {
                 }
 
                 if (medicineDTO != null) populateFields(medicineDTO);
-                else { new Alert(Alert.AlertType.INFORMATION, "Medicine Not Found").showAndWait(); clearFields(); }
+                else {
+                    new Alert(Alert.AlertType.INFORMATION, "Medicine Not Found").showAndWait();
+                    clearFields();
+                }
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, "Error searching: " + e.getMessage()).show();
             }
@@ -180,9 +187,11 @@ public class MedicineController {
                 else {
                     java.time.LocalDate expDate = new java.sql.Date(item.getExpDate().getTime()).toLocalDate();
                     java.time.LocalDate today = java.time.LocalDate.now();
-                    if (expDate.isBefore(today)) setStyle("-fx-background-color: #ff9999; -fx-text-background-color: white;");
+                    if (expDate.isBefore(today))
+                        setStyle("-fx-background-color: #ff9999; -fx-text-background-color: white;");
                     else if (expDate.isBefore(today.plusDays(21))) setStyle("-fx-background-color: #ffcdd2;");
-                    else if (item.getQtyInStock() <= 21) setStyle("-fx-background-color: #fef08a; -fx-text-background-color: black;");
+                    else if (item.getQtyInStock() <= 21)
+                        setStyle("-fx-background-color: #fef08a; -fx-text-background-color: black;");
                     else setStyle("");
                 }
             }
@@ -194,7 +203,9 @@ public class MedicineController {
             medicineList.clear();
             medicineList.addAll(medicineBO.getAllMedicines());
             loadMedicineNames();
-        } catch (SQLException | ClassNotFoundException e) { e.printStackTrace(); }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean validateInput(String price, String qty) {
@@ -214,33 +225,56 @@ public class MedicineController {
         try {
             allMedicineNames.clear();
             for (MedicineDTO m : medicineBO.getAllMedicines()) allMedicineNames.add(m.getMedName());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupAutoSuggestion() {
         ContextMenu suggestionsMenu = new ContextMenu();
         txtName.textProperty().addListener((obs, oldV, newV) -> {
-            if (newV == null || newV.isEmpty()) { suggestionsMenu.hide(); return; }
+            if (newV == null || newV.isEmpty()) {
+                suggestionsMenu.hide();
+                return;
+            }
             List<String> matches = allMedicineNames.stream().filter(n -> n.toLowerCase().contains(newV.toLowerCase())).collect(Collectors.toList());
-            if (matches.isEmpty()) { suggestionsMenu.hide(); return; }
+            if (matches.isEmpty()) {
+                suggestionsMenu.hide();
+                return;
+            }
             suggestionsMenu.getItems().clear();
             for (String match : matches) {
                 MenuItem item = new MenuItem(match);
                 item.setOnAction(e -> {
-                    txtName.setText(match); suggestionsMenu.hide();
+                    txtName.setText(match);
+                    suggestionsMenu.hide();
                     try {
                         MedicineDTO medicine = medicineBO.searchMedicineByName(match);
                         if (medicine != null) populateFields(medicine);
-                    } catch (Exception ex) { ex.printStackTrace(); }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 });
                 suggestionsMenu.getItems().add(item);
             }
             if (!suggestionsMenu.isShowing()) suggestionsMenu.show(txtName, Side.BOTTOM, 0, 0);
         });
-        txtName.focusedProperty().addListener((obs, oldV, newV) -> { if (!newV) suggestionsMenu.hide(); });
+        txtName.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) suggestionsMenu.hide();
+        });
     }
 
-    @FXML void btnClearOnAction(ActionEvent event) { clearFields(); }
+    @FXML
+    void btnClearOnAction(ActionEvent event) {
+        clearFields();
+    }
 
-    private void clearFields() { txtId.clear(); txtName.clear(); txtBrand.clear(); txtPrice.clear(); txtQty.clear(); dpExpDate.setValue(null); }
+    private void clearFields() {
+        txtId.clear();
+        txtName.clear();
+        txtBrand.clear();
+        txtPrice.clear();
+        txtQty.clear();
+        dpExpDate.setValue(null);
+    }
 }

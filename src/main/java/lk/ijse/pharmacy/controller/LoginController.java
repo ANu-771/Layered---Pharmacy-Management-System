@@ -1,8 +1,10 @@
 package lk.ijse.pharmacy.controller;
 
 import javafx.event.ActionEvent;
+
 import java.io.IOException;
 import java.sql.SQLException;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,8 +37,16 @@ public class LoginController {
         usernameField.setStyle(defaultStyle);
         passwordField.setStyle(defaultStyle);
 
-        if (username.isEmpty()) { usernameField.setStyle(errorStyle); usernameField.requestFocus(); return; }
-        if (password.isEmpty()) { passwordField.setStyle(errorStyle); passwordField.requestFocus(); return; }
+        if (username.isEmpty()) {
+            usernameField.setStyle(errorStyle);
+            usernameField.requestFocus();
+            return;
+        }
+        if (password.isEmpty()) {
+            passwordField.setStyle(errorStyle);
+            passwordField.requestFocus();
+            return;
+        }
 
         try {
             boolean isUserFound = userBO.isUsernameExists(username);

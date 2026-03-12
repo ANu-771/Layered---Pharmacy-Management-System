@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import lk.ijse.pharmacy.bo.BOFactory;
 import lk.ijse.pharmacy.bo.custom.CustomerBO;
 import lk.ijse.pharmacy.dto.CustomerDTO;
+
 import java.sql.SQLException;
 
 public class CustomerController {
@@ -178,7 +179,9 @@ public class CustomerController {
     }
 
     @FXML
-    void btnResetOnAction(ActionEvent event) { clearFields(); }
+    void btnResetOnAction(ActionEvent event) {
+        clearFields();
+    }
 
     private void populateFields(CustomerDTO customerDTO) {
         txtId.setText(String.valueOf(customerDTO.getCustomerId()));
