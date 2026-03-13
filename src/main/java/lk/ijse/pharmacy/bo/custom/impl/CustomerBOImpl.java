@@ -17,6 +17,13 @@ public class CustomerBOImpl implements CustomerBO {
 
     @Override
     public boolean saveCustomer(CustomerDTO dto) throws SQLException, ClassNotFoundException {
+        List<Customer> allCustomers = customerDAO.getAll();
+        for (Customer customer : allCustomers) {
+            if (customer.getContact().equals(dto.getContact())) {
+                throw new RuntimeException("A customer with this Contact Number already exists!");
+            }
+        }
+
         return customerDAO.save(new Customer(dto.getCustomerId(), dto.getName(), dto.getContact(), dto.getAddress()));
     }
 

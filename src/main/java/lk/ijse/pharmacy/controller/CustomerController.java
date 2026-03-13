@@ -80,13 +80,6 @@ public class CustomerController {
         }
         if (!validateCustomerInput(name, contact, address)) return;
 
-        for (CustomerDTO customer : customerList) {
-            if (customer.getContact().equals(contact)) {
-                new Alert(Alert.AlertType.WARNING, "A customer with this Contact Number already exists!").show();
-                return;
-            }
-        }
-
         CustomerDTO customer = new CustomerDTO(0, name, contact, address);
         try {
             if (customerBO.saveCustomer(customer)) {
@@ -94,6 +87,8 @@ public class CustomerController {
                 loadAllCustomers();
                 clearFields();
             }
+        } catch (RuntimeException e) {
+            new Alert(Alert.AlertType.WARNING, e.getMessage()).show();
         } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
         }
