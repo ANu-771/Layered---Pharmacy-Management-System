@@ -260,6 +260,10 @@ public class OrderController {
 
                 new Alert(Alert.AlertType.INFORMATION, "Order Placed Successfully!").show();
 
+                if (DashboardController.getInstance() != null) {
+                    DashboardController.getInstance().refreshDashboard();
+                }
+
                 cartList.clear();
                 calculateNetTotal();
                 cmbMedicineId.getSelectionModel().clearSelection();

@@ -17,25 +17,23 @@ import java.util.TreeMap;
 
 public class DashboardController {
 
+    // 1. Create a static instance of this controller
     private static DashboardController instance;
 
-    @FXML
-    private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
-    @FXML
-    private AreaChart<String, Number> chartSales;
-    @FXML
-    private TableView<MedicineDTO> tblExpiring;
-    @FXML
-    private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
-    @FXML
-    private TableColumn<MedicineDTO, Integer> colExpQty;
+    @FXML private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
+    @FXML private AreaChart<String, Number> chartSales;
+    @FXML private TableView<MedicineDTO> tblExpiring;
+    @FXML private TableColumn<MedicineDTO, String> colExpId, colExpName, colExpDate;
+    @FXML private TableColumn<MedicineDTO, Integer> colExpQty;
 
     DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
 
+    // 2. Assign the instance when the controller is loaded
     public DashboardController() {
         instance = this;
     }
 
+    // 3. Provide a way for other controllers to get this instance
     public static DashboardController getInstance() {
         return instance;
     }
@@ -43,9 +41,10 @@ public class DashboardController {
     @FXML
     public void initialize() {
         chartSales.setAnimated(false);
-        refreshDashboard();
+        refreshDashboard(); // Load data initially
     }
 
+    // 4. Create a public method to refresh the data
     public void refreshDashboard() {
         loadDashboardCounts();
         loadChart();
@@ -57,9 +56,7 @@ public class DashboardController {
             lblTotalMedicines.setText(String.valueOf(dashboardBO.getTotalMedicineCount()));
             lblActiveCustomers.setText(String.valueOf(dashboardBO.getActiveCustomerCount()));
             lblTodayIncome.setText(String.format("Rs. %.2f", dashboardBO.getTodayIncome()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void loadChart() {
@@ -74,9 +71,7 @@ public class DashboardController {
                 series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
             }
             chartSales.getData().add(series);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void loadExpiringMedicines() {
@@ -87,8 +82,6 @@ public class DashboardController {
 
         try {
             tblExpiring.setItems(FXCollections.observableArrayList(dashboardBO.getExpiringMedicines()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }

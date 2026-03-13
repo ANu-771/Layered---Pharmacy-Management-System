@@ -88,6 +88,10 @@ public class MedicineController {
                 new Alert(Alert.AlertType.INFORMATION, "Medicine Saved Successfully!").show();
                 loadAllMedicines();
                 clearFields();
+
+                if (DashboardController.getInstance() != null) {
+                    DashboardController.getInstance().refreshDashboard();
+                }
             }
         } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
@@ -121,6 +125,10 @@ public class MedicineController {
                 new Alert(Alert.AlertType.INFORMATION, "Updated Successfully!").show();
                 loadAllMedicines();
                 clearFields();
+
+                if (DashboardController.getInstance() != null) {
+                    DashboardController.getInstance().refreshDashboard();
+                }
             }
         } catch (SQLException | ClassNotFoundException e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
