@@ -96,7 +96,7 @@ public class MedicineDAOImpl implements MedicineDAO {
     }
 
     @Override
-    public boolean updateExactQty(int medicineId, int newQty) throws SQLException {
+    public boolean updateExactQty(int medicineId, int newQty) throws SQLException, ClassNotFoundException {
         String sql = "UPDATE medicine SET qty_in_stock = ? WHERE medicine_id = ?";
         return CrudUtil.execute(sql, newQty, medicineId);
     }
