@@ -11,7 +11,6 @@ import java.util.List;
 
 public class CustomerDAOImpl implements CustomerDAO {
 
-    // SAVE
     @Override
     public boolean save(Customer entity) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute(
@@ -22,7 +21,6 @@ public class CustomerDAOImpl implements CustomerDAO {
         );
     }
 
-    // UPDATE
     @Override
     public boolean update(Customer entity) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute(
@@ -34,13 +32,11 @@ public class CustomerDAOImpl implements CustomerDAO {
         );
     }
 
-    // DELETE
     @Override
     public boolean delete(int id) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("DELETE FROM customer WHERE customer_id = ?", id);
     }
 
-    // GET ALL Customers TableView
     @Override
     public List<Customer> getAll() throws SQLException, ClassNotFoundException {
         List<Customer> list = new ArrayList<>();
@@ -58,10 +54,8 @@ public class CustomerDAOImpl implements CustomerDAO {
         return list;
     }
 
-    // SEARCH Customer
     @Override
     public Customer search(int id) throws SQLException, ClassNotFoundException {
-        // FIXED: Changed "id" to "customer_id" in the SQL query
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM customer WHERE customer_id = ?", id);
 
         if (resultSet.next()) {

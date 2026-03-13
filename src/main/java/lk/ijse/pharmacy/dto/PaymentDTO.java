@@ -10,7 +10,6 @@ public class PaymentDTO {
     private Date paymentDate;
     private String paymentMethod;
 
-    // Constructors
     public PaymentDTO() {
     }
 
@@ -28,7 +27,6 @@ public class PaymentDTO {
         this.amount = cashAmount;
     }
 
-    // Getters and Setters
     public int getPaymentId() {
         return paymentId;
     }

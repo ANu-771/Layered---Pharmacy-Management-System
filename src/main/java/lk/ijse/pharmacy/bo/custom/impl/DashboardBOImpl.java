@@ -13,7 +13,6 @@ import java.util.Map;
 
 public class DashboardBOImpl implements DashboardBO {
 
-    // Get the QueryDAO from the factory
     QueryDAO queryDAO = (QueryDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.QUERY);
 
     @Override

@@ -40,7 +40,6 @@ public class AlertUtil {
                 icon.setFitWidth(48);
                 alert.setGraphic(icon);
             } catch (Exception e) {
-                // If icon fails, just ignore it
             }
         }
 

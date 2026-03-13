@@ -8,7 +8,6 @@ public class OrderMedicineDTO {
     private double unitPrice;
     private double lineTotal;
 
-    // Constructors
     public OrderMedicineDTO() {
     }
 
@@ -20,7 +19,6 @@ public class OrderMedicineDTO {
         this.lineTotal = lineTotal;
     }
 
-    // Getters and Setters
     public int getOrderId() {
         return orderId;
     }

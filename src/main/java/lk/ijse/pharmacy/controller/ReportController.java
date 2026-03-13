@@ -99,7 +99,6 @@ public class ReportController {
 
     private void loadTableData() {
         try {
-            // 3. Call BO method
             List<ReportTM> orders = reportBO.getAllOrderDetails();
             tblReportDetails.setItems(FXCollections.observableArrayList(orders));
         } catch (SQLException | ClassNotFoundException e) {

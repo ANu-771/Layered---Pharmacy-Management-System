@@ -9,7 +9,6 @@ public class BOFactory {
     private BOFactory() {
     }
 
-    // Singleton getInstance method
     public static BOFactory getInstance() {
         return boFactory == null ? boFactory = new BOFactory() : boFactory;
     }

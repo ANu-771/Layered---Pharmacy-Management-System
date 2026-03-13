@@ -58,7 +58,6 @@ public class LoginController {
                 return;
             }
 
-            // Check Password using BO
             String role = userBO.checkLogin(username, password);
 
             if (role != null) {

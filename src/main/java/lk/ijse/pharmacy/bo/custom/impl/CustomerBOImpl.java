@@ -12,7 +12,6 @@ import java.util.List;
 
 public class CustomerBOImpl implements CustomerBO {
 
-    // Get the DAO from the Factory
     CustomerDAO customerDAO = (CustomerDAO) DAOFactory.getInstance().getDAO(DAOFactory.DAOTypes.CUSTOMER);
 
     @Override
@@ -42,7 +41,6 @@ public class CustomerBOImpl implements CustomerBO {
         List<Customer> entityList = customerDAO.getAll();
         List<CustomerDTO> dtoList = new ArrayList<>();
 
-        // Convert Entities back to DTOs for the Controller
         for (Customer entity : entityList) {
             dtoList.add(new CustomerDTO(entity.getCustomerId(), entity.getName(), entity.getContact(), entity.getAddress()));
         }

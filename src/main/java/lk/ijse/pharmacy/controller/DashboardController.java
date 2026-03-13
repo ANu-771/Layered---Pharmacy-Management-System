@@ -17,7 +17,6 @@ import java.util.TreeMap;
 
 public class DashboardController {
 
-    // 1. Create a static instance of this controller
     private static DashboardController instance;
 
     @FXML private Label lblTotalMedicines, lblActiveCustomers, lblTodayIncome;
@@ -28,12 +27,10 @@ public class DashboardController {
 
     DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
 
-    // 2. Assign the instance when the controller is loaded
     public DashboardController() {
         instance = this;
     }
 
-    // 3. Provide a way for other controllers to get this instance
     public static DashboardController getInstance() {
         return instance;
     }
@@ -41,10 +38,9 @@ public class DashboardController {
     @FXML
     public void initialize() {
         chartSales.setAnimated(false);
-        refreshDashboard(); // Load data initially
+        refreshDashboard();
     }
 
-    // 4. Create a public method to refresh the data
     public void refreshDashboard() {
         loadDashboardCounts();
         loadChart();
